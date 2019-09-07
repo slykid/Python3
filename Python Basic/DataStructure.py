@@ -79,3 +79,29 @@ print(a.index(2))   # 해당 값의 인덱스를 출력
 ## count
 a = (1,2,1,3,5)
 print(a.count(1))   # 해당 값의 개수를 출력
+
+# 3. 딕셔너리(사전)
+a = {"name":"Kilhyun" , "HP":"010-1234-5678", "birth":"2015-12-01"}
+b = {0: "hello", 1:"World"}
+c = {"arr":[1,2,3,4,5]}
+
+## 출력
+a["name"]
+print(a.get("name"))
+print(a.get("address")) # 키에 대한 값이 없는 경우 None을 반환, 자료에 대한 조회시 이용하면 좋음
+print(c["arr"][2])
+
+## 데이터 추가
+a["address"] = "Seoul"
+print(a.get("address"))
+
+a["rank"] = [1, 3, 6]
+a["rank2"] = (1, 5, 7)
+print(a)
+
+## Keys, Values, Items
+### Item : Key-Value 쌍을 의미
+a = {"name":"Kilhyun" , "HP":"010-1234-5678", "birth":"2015-12-01"}
+print(a.keys())     # 딕셔너리에 존재하는 모든 Key 를 출력함
+print(a.values())   # 딕셔너리에 존재하는 모든 Value 를 출력함
+print(a.items())    # 딕셔너리에 존재하는 모든 Item(Key-Value 쌍, 튜플형식) 를 출력함
