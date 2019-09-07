@@ -1,0 +1,16 @@
+name: handson-ml
+dependencies:
+  - python=3.6
+  - scikit-learn
+  - matplotlib
+  - jupyter
+  - pandas
+  - pillow
+  - nltk
+  - pip:
+    - tensorflow
+    - gym
+    - graphviz
+    - watermark
+    - urlextract
+    - xgboost
