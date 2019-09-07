@@ -65,3 +65,17 @@ a.append(b) # append와의 차이 : append는 리스트 자체를 하나의 요�
 print(a)
 a.pop()
 
+# 2. 튜플
+a = (1,2)
+del a[2]    # TypeError: 'tuple' object doesn't support item deletion 발생
+
+# 1) 사용 함수
+## in
+print(2 in a)   # 해당 값이 튜플에 존재하는 지 확인
+
+## index
+print(a.index(2))   # 해당 값의 인덱스를 출력
+
+## count
+a = (1,2,1,3,5)
+print(a.count(1))   # 해당 값의 개수를 출력
