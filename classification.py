@@ -87,3 +87,65 @@ def plot_precision_recall_vs_threshold(precisions, recalls, thresholds):
 
 plot_precision_recall_vs_threshold(precisions, recalls, thresholds)
 plt.show()
+
+
+# 의사결정나무
+import os
+import time
+
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+from matplotlib.colors import ListedColormap
+
+from sklearn.datasets import load_iris
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import export_graphviz
+
+# 시각화 시 한글 깨짐에 대한 처리
+font_location = 'C:/Windows/Fonts/NanumBarunGothic.ttf' # For Windows
+font_name = fm.FontProperties(fname=font_location).get_name()
+matplotlib.rc('font', family=font_name)
+
+# 이미지 저장을 위한 경로 설정 및 폴더 생성
+# PROJECT_ROOT_DIR = "D:\\workspace\\Python3"
+PROJECT_ROOT_DIR = "D:\\workspace\\Python3"
+CHAPTER_ID = "decision_trees"
+if os.path.isdir(os.path.join(PROJECT_ROOT_DIR, "images")) is True:
+    if os.path.isdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID)) is True:
+        time.sleep(1)
+    else:
+        os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID))
+
+elif os.path.isdir(os.path.join(PROJECT_ROOT_DIR, "images")) is False:
+    os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images"))
+    os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID))
+else:
+    os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID))
+
+def image_path(fig_id):
+    return os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID, fig_id)
+
+def save_fig(fig_id, tight_layout=True):
+    if tight_layout:
+        plt.tight_layout()
+    plt.savefig(image_path(fig_id) + ".png", format='png', dpi=300)
+
+iris = load_iris()
+x = iris.data[:, 2:]
+y = iris.target
+
+tree_clf = DecisionTreeClassifier(max_depth=2)
+tree_clf.fit(x, y)
+
+export_graphviz(tree_clf, out_file=image_path("iris_tree.dot"),\
+                feature_names=["꽃잎 길이 (cm)", "꽃잎 너비 (cm)"], class_names=iris.target_names,\
+                rounded=True, filled=True)
+
+import graphviz
+with open("images\\decision_trees\\iris_tree.dot", 'rt', encoding='UTF8') as f:
+    dot_graph = f.read()
+dot = graphviz.Source(dot_graph)
+dot.format = 'png'
+dot.render(filename='iris_tree', directory='images\\decision_trees', cleanup=True)
+dot
