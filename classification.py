@@ -90,17 +90,20 @@ plt.show()
 
 
 # 의사결정나무
+import numpy as np
 import os
 import time
+
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
 
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 from matplotlib.colors import ListedColormap
 
-from sklearn.datasets import load_iris
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.tree import export_graphviz
+from pydotplus import graph_from_dot_data
 
 # 시각화 시 한글 깨짐에 대한 처리
 font_location = 'C:/Windows/Fonts/NanumBarunGothic.ttf' # For Windows
@@ -131,7 +134,7 @@ def save_fig(fig_id, tight_layout=True):
         plt.tight_layout()
     plt.savefig(image_path(fig_id) + ".png", format='png', dpi=300)
 
-iris = load_iris()
+iris = datasets.load_iris()
 x = iris.data[:, 2:]
 y = iris.target
 
@@ -186,50 +189,6 @@ plt.show()
 save_fig("Compare Impurity Index with each label")
 
 # 결정트리 만들기
-import numpy as np
-import os
-import time
-
-from sklearn.tree import DecisionTreeClassifier, export_graphviz
-from sklearn import datasets
-from sklearn.model_selection import train_test_split
-
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
-from matplotlib.colors import ListedColormap
-
-from pydotplus import graph_from_dot_data
-
-# 시각화 시 한글 깨짐에 대한 처리
-font_location = 'C:/Windows/Fonts/NanumBarunGothic.ttf' # For Windows
-font_name = fm.FontProperties(fname=font_location).get_name()
-matplotlib.rc('font', family=font_name)
-
-# 이미지 저장을 위한 경로 설정 및 폴더 생성
-# PROJECT_ROOT_DIR = "D:\\workspace\\Python3"
-PROJECT_ROOT_DIR = "D:\\workspace\\Python3"
-CHAPTER_ID = "decision_trees"
-if os.path.isdir(os.path.join(PROJECT_ROOT_DIR, "images")) is True:
-    if os.path.isdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID)) is True:
-        time.sleep(1)
-    else:
-        os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID))
-
-elif os.path.isdir(os.path.join(PROJECT_ROOT_DIR, "images")) is False:
-    os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images"))
-    os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID))
-else:
-    os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID))
-
-def image_path(fig_id):
-    return os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID, fig_id)
-
-def save_fig(fig_id, tight_layout=True):
-    if tight_layout:
-        plt.tight_layout()
-    plt.savefig(image_path(fig_id) + ".png", format='png', dpi=300)
-
 iris = datasets.load_iris()
 
 x = iris.data[:, [2, 3]]
@@ -286,4 +245,10 @@ dot_data = export_graphviz(tree, filled=True, rounded=True, class_names=["Setosa
                            feature_names=["Petal Length", "Petal Width"], out_file=None)
 graph = graph_from_dot_data(dot_data)
 graph.write_png("images/decision_trees/iris_decisionTreeDetail.png")
+
+# 클래스 추정확률 계산
+tree.predict_proba([[5, 1.5]])
+tree.predict([[5, 1.5]])
+
+# CART 알고리즘
 
