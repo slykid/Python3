@@ -250,5 +250,62 @@ graph.write_png("images/decision_trees/iris_decisionTreeDetail.png")
 tree.predict_proba([[5, 1.5]])
 tree.predict([[5, 1.5]])
 
-# CART 알고리즘
+# 의사 결정 나무 회귀
+from sklearn.tree import DecisionTreeRegressor
+import numpy as np
+
+# 추가적인 비교
+# 2차식으로 만든 데이터셋 + 잡음
+np.random.seed(42)
+m = 200
+x = np.random.rand(m, 1)
+y = 4 * (x - 0.5) ** 2
+y = y + np.random.randn(m, 1) / 10
+
+tree_reg1 = DecisionTreeRegressor(random_state=42, max_depth=2)
+tree_reg2 = DecisionTreeRegressor(random_state=42, max_depth=3)
+tree_reg1.fit(x, y)
+tree_reg2.fit(x, y)
+
+def plot_regression_predictions(tree_reg, X, y, axes=[0, 1, -0.2, 1], ylabel="$y$"):
+    x1 = np.linspace(axes[0], axes[1], 500).reshape(-1, 1)
+    y_pred = tree_reg.predict(x1)
+    plt.axis(axes)
+    plt.xlabel("$x_1$", fontsize=18)
+    if ylabel:
+        plt.ylabel(ylabel, fontsize=18, rotation=0)
+    plt.plot(X, y, "b.")
+    plt.plot(x1, y_pred, "r.-", linewidth=2, label=r"$\hat{y}$")
+
+plt.figure(figsize=(11, 4))
+plt.subplot(121)
+plot_regression_predictions(tree_reg1, x, y)
+for split, style in ((0.1973, "k-"), (0.0917, "k--"), (0.7718, "k--")):
+    plt.plot([split, split], [-0.2, 1], style, linewidth=2)
+plt.text(0.21, 0.65, "깊이=0", fontsize=15)
+plt.text(0.01, 0.2, "깊이=1", fontsize=13)
+plt.text(0.65, 0.8, "깊이=1", fontsize=13)
+plt.legend(loc="upper center", fontsize=18)
+plt.title("max_depth=2", fontsize=14)
+
+plt.subplot(122)
+plot_regression_predictions(tree_reg2, x, y, ylabel=None)
+for split, style in ((0.1973, "k-"), (0.0917, "k--"), (0.7718, "k--")):
+    plt.plot([split, split], [-0.2, 1], style, linewidth=2)
+for split in (0.0458, 0.1298, 0.2873, 0.9040):
+    plt.plot([split, split], [-0.2, 1], "k:", linewidth=1)
+plt.text(0.3, 0.5, "깊이=2", fontsize=13)
+plt.title("max_depth=3", fontsize=14)
+
+save_fig("tree_regression_plot")
+plt.show()
+
+dot_data = export_graphviz(tree_reg1, filled=True, rounded=True, out_file=None)
+graph = graph_from_dot_data(dot_data)
+graph.write_png("images/decision_trees/iris_decisionTreeRegressorDetail_1.png")
+
+dot_data = export_graphviz(tree_reg2, filled=True, rounded=True, out_file=None)
+graph = graph_from_dot_data(dot_data)
+graph.write_png("images/decision_trees/iris_decisionTreeRegressorDetail_2.png")
+
 
