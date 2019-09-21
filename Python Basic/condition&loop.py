@@ -59,3 +59,89 @@ if a == 1:
         print("b is not 2")
 
 # 실행결과 : print
+
+
+# 반복문
+# 특정 조건에 대한 코드를 반복적으로 수행하는 경우에 사용함
+# 기본적으로 while 문 , for 문이 존재함
+
+# while 문
+i = 0
+while i < 11:
+    print("i is ", i)
+    i += 1
+
+# for 문
+for i in range(10):
+    # range() : 어떤 값 미만 까지의 숫자를 순서대로 생성함
+    #           기본 시작 값 = 0, 입력된 값미만 까지의 숫자 생성
+    #           만약 증감 수를 변경할 경우 마지막 인자에 증감수를 입력하면 됨
+    print("i is", i)
+
+for i2 in range(1, 11):
+    print("i2 is", i2)
+
+for i3 in range(1, 11, 2):
+    print("i3 is", i3)
+
+# Sequence 자료형 반복
+# Sequence : 순서가 있는 자료형을 의미하며, 문자열, 리스트, 튜플, 딕셔너리, 집합 등이 속한다.
+# iterable return function : range, reversed, enumerate, filter, map, zip
+
+# ex1
+names = ["Kim", "Lee", "Cho", "Choi", "Yoo"]
+for v1 in names:
+    print("You are", v1)
+
+# ex2
+my_info = {
+    "name":"Kim",
+    "age" : 27,
+    "city" : "Kimpo"
+}
+
+# 기본 값은 키를 호출함
+for v2 in my_info:
+    print("my_info", v2)
+
+# value 만 이용하는 경우
+# item 을 이용하는 경우
+for v3 in my_info.values():
+    print("my_info", v3)
+
+# item 을 이용하는 경우 k, v 모두 갖고 있으므로 매개 변수도 2개를 사용함
+for k, v in my_info.items():
+    print("my_info", k, v)
+
+name = "KilhyunKim"
+new_name = ""
+for n in name:
+    if n.isupper():
+        new_name += n.lower()
+    elif n.islower():
+        new_name += n.upper()
+print(new_name)
+
+# Continue & Break 문
+# Continue 는 해당문구 이하의 내용은 처리하지않고 스킵하는 키워드
+# Break 는 해당문구 이하의 내용을 처리하지 않고 반복문을 중지하는 키워드
+for i in [14, 6, 4, 0, 129, 26, 45, 10, 16, 100]:
+    if i == 10: print("Found!");break
+    elif i == 0: continue
+    else : print("i is", i)
+
+for i in ["1", 2, True, 4.3, complex(5)]:
+    if type(i) is float:  # 타입이 실수형인 경우 패스
+        continue
+    print("i is", i)    # 실수형 외의 타입은 전부 출력
+
+# for - else 문
+# for 반복문 정상적으로 동작하면 반복문 내의 코드를 수행
+# 만일 for 반복문 내에 break 문이 없는 경우 else 문의 코드가 실행
+for i in [14, 6, 4, 0, 129, 26, 45, 10, 16, 100]:
+    if i == 1000: print("Found!")
+    elif i == 0: continue
+    else : print("i is", i)
+else:
+    print("Not found 1000")
+
