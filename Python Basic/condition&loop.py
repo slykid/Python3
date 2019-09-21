@@ -137,7 +137,7 @@ for i in ["1", 2, True, 4.3, complex(5)]:
 
 # for - else 문
 # for 반복문 정상적으로 동작하면 반복문 내의 코드를 수행
-# 만일 for 반복문 내에 break 문이 없는 경우 else 문의 코드가 실행
+# 만일 for 반복문 내에 조건에 만족하는 값이 없는 경우 else 문의 코드가 실행
 for i in [14, 6, 4, 0, 129, 26, 45, 10, 16, 100]:
     if i == 1000: print("Found!")
     elif i == 0: continue
