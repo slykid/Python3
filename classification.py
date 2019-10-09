@@ -308,4 +308,140 @@ dot_data = export_graphviz(tree_reg2, filled=True, rounded=True, out_file=None)
 graph = graph_from_dot_data(dot_data)
 graph.write_png("images/decision_trees/iris_decisionTreeRegressorDetail_2.png")
 
+# 사이킷런 투표기반 분류기
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import VotingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+
+from sklearn.datasets import make_moons
+
+from sklearn.metrics import accuracy_score
+
+x, y = make_moons(n_samples=500, noise=0.30, random_state=42)
+x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=42)
+
+log_clf = LogisticRegression(solver='liblinear', random_state=42)
+rnd_clf = RandomForestClassifier(n_estimators=10, random_state=42)
+svm_clf = SVC(gamma='auto', random_state=42)
+
+## 직접 투표 분류기
+voting_clf = VotingClassifier(
+    estimators=[('lr', log_clf), ('rf', rnd_clf), ('svc', svm_clf)], voting="hard"
+)
+voting_clf.fit(x_train, y_train)
+
+for clf in (log_clf, rnd_clf, svm_clf, voting_clf):
+    clf.fit(x_train, y_train)
+    y_pred = clf.predict(x_test)
+    print(clf.__class__.__name__, accuracy_score(y_test, y_pred))
+
+## 간접 투표 분류기
+log_clf = LogisticRegression(solver='liblinear', random_state=42)
+rnd_clf = RandomForestClassifier(n_estimators=10, random_state=42)
+svm_clf = SVC(gamma='auto', probability=True, random_state=42)
+
+voting_clf = VotingClassifier(
+    estimators=[('lr', log_clf), ('rf', rnd_clf), ('svc', svm_clf)], voting="soft"
+)
+voting_clf.fit(x_train, y_train)
+
+for clf in (log_clf, rnd_clf, svm_clf, voting_clf):
+    clf.fit(x_train, y_train)
+    y_pred = clf.predict(x_test)
+    print(clf.__class__.__name__, accuracy_score(y_test, y_pred))
+
+# 배깅 & 페이스팅
+## 배깅
+import os
+import time
+import numpy as np
+
+from sklearn.ensemble import BaggingClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import make_moons
+
+from sklearn.metrics import accuracy_score
+
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+from matplotlib.colors import ListedColormap
+
+from pydotplus import graph_from_dot_data
+
+# 시각화 시 한글 깨짐에 대한 처리
+font_location = 'C:/Windows/Fonts/NanumBarunGothic.ttf' # For Windows
+font_name = fm.FontProperties(fname=font_location).get_name()
+matplotlib.rc('font', family=font_name)
+
+# 이미지 저장을 위한 경로 설정 및 폴더 생성
+# PROJECT_ROOT_DIR = "D:\\workspace\\Python3"
+PROJECT_ROOT_DIR = "D:\\workspace\\Python3"
+CHAPTER_ID = "ensenble"
+if os.path.isdir(os.path.join(PROJECT_ROOT_DIR, "images")) is True:
+    if os.path.isdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID)) is True:
+        time.sleep(1)
+    else:
+        os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID))
+
+elif os.path.isdir(os.path.join(PROJECT_ROOT_DIR, "images")) is False:
+    os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images"))
+    os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID))
+else:
+    os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID))
+
+def image_path(fig_id):
+    return os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID, fig_id)
+
+def save_fig(fig_id, tight_layout=True):
+    if tight_layout:
+        plt.tight_layout()
+    plt.savefig(image_path(fig_id) + ".png", format='png', dpi=300)
+
+x, y = make_moons(n_samples=500, noise=0.30, random_state=42)
+x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=42)
+
+bag_clf = BaggingClassifier(DecisionTreeClassifier(),
+                            n_estimators=500,
+                            max_samples=100,
+                            bootstrap=True,
+                            n_jobs=1)
+bag_clf.fit(x_train, y_train)
+y_pred = bag_clf.predict(x_test)
+print(accuracy_score(y_test, y_pred))
+
+tree_clf = DecisionTreeClassifier(random_state=42)
+tree_clf.fit(x_train, y_train)
+y_pred_tree = tree_clf.predict(x_test)
+print(accuracy_score(y_test, y_pred_tree))
+
+def plot_decision_boundary(clf, X, y, axes=[-1.5, 2.5, -1, 1.5], alpha=0.5, contour=True):
+    x1s = np.linspace(axes[0], axes[1], 100)
+    x2s = np.linspace(axes[2], axes[3], 100)
+    x1, x2 = np.meshgrid(x1s, x2s)
+    X_new = np.c_[x1.ravel(), x2.ravel()]
+    y_pred = clf.predict(X_new).reshape(x1.shape)
+    custom_cmap = ListedColormap(['#fafab0','#9898ff','#a0faa0'])
+    plt.contourf(x1, x2, y_pred, alpha=0.3, cmap=custom_cmap)
+    if contour:
+        custom_cmap2 = ListedColormap(['#7d7d58','#4c4c7f','#507d50'])
+        plt.contour(x1, x2, y_pred, cmap=custom_cmap2, alpha=0.8)
+    plt.plot(X[:, 0][y==0], X[:, 1][y==0], "yo", alpha=alpha)
+    plt.plot(X[:, 0][y==1], X[:, 1][y==1], "bs", alpha=alpha)
+    plt.axis(axes)
+    plt.xlabel(r"$x_1$", fontsize=18)
+    plt.ylabel(r"$x_2$", fontsize=18, rotation=0)
+
+plt.figure(figsize=(11,4))
+plt.subplot(121)
+plot_decision_boundary(tree_clf, x, y)
+plt.title("결정 트리", fontsize=14)
+plt.subplot(122)
+plot_decision_boundary(bag_clf, x, y)
+plt.title("배깅을 사용한 결정 트리", fontsize=14)
+save_fig("decision_tree_without_and_with_bagging_plot")
+plt.show()
 
