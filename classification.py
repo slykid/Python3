@@ -445,3 +445,101 @@ plt.title("배깅을 사용한 결정 트리", fontsize=14)
 save_fig("decision_tree_without_and_with_bagging_plot")
 plt.show()
 
+
+## 랜덤 포레스트
+import numpy as np
+import os
+import time
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
+
+from sklearn.metrics import accuracy_score
+
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+from matplotlib.colors import ListedColormap
+
+# 시각화 시 한글 깨짐에 대한 처리
+font_location = 'C:/Windows/Fonts/NanumBarunGothic.ttf' # For Windows
+font_name = fm.FontProperties(fname=font_location).get_name()
+matplotlib.rc('font', family=font_name)
+
+# 이미지 저장을 위한 경로 설정 및 폴더 생성
+# PROJECT_ROOT_DIR = "D:\\workspace\\Python3"
+PROJECT_ROOT_DIR = "D:\\workspace\\Python3"
+CHAPTER_ID = "ensenble"
+if os.path.isdir(os.path.join(PROJECT_ROOT_DIR, "images")) is True:
+    if os.path.isdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID)) is True:
+        time.sleep(1)
+    else:
+        os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID))
+
+elif os.path.isdir(os.path.join(PROJECT_ROOT_DIR, "images")) is False:
+    os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images"))
+    os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID))
+else:
+    os.mkdir(os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID))
+
+def image_path(fig_id):
+    return os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID, fig_id)
+
+def save_fig(fig_id, tight_layout=True):
+    if tight_layout:
+        plt.tight_layout()
+    plt.savefig(image_path(fig_id) + ".png", format='png', dpi=300)
+
+iris = datasets.load_iris()
+
+x = iris.data[:, [2, 3]]
+y = iris.target
+
+x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=42)
+
+model_forest = RandomForestClassifier(criterion="gini", n_estimators=25, random_state=1, n_jobs=2)
+model_forest.fit(x_train, y_train)
+y_pred = model_forest.predict(x_test)
+
+def plot_decision_regions(x, y, classifier, test_idx=None, resolution=0.02):
+    markers = ('s', 'x', 'o', '^', 'v')
+    colors = ("red", "blue", "lightgreen", "gray", "cyan")
+    cmap = ListedColormap(colors[:len(np.unique(y))])
+
+    x1_min, x1_max = x[:, 0].min() - 1, x[:, 0].max() + 1
+    x2_min, x2_max = x[:, 1].min() - 1, x[:, 1].max() + 1
+
+    xx1, xx2 = np.meshgrid(np.arange(x1_min, x1_max, resolution),
+                           np.arange(x2_min, x2_max, resolution))
+
+    z = classifier.predict(np.array([xx1.ravel(), xx2.ravel()]).T)
+    z = z.reshape(xx1.shape)
+
+    plt.contourf(xx1, xx2, z, alpha=.3, cmap=cmap)
+    plt.xlim(xx1.min(), xx1.max())
+    plt.ylim(xx2.min(), xx2.max())
+
+    for idx, cl in enumerate(np.unique(y)):
+        plt.scatter(x = x[y == cl, 0], y = x[y == cl, 1],
+                    alpha=0.8, c=colors[idx], marker=markers[idx],
+                    label=cl, edgecolors="black")
+
+    if test_idx:
+        x_test, y_test = x[test_idx, :], y[test_idx]
+
+        plt.scatter(x_test[:, 0], x_test[:, 1],
+                    c='', edgecolors="black", alpha=1.0,
+                    linewidth=1, marker="o",
+                    s=100, label="test set")
+
+x_combined = np.vstack((x_train, x_test))
+y_combined = np.hstack((y_train, y_test))
+
+plot_decision_regions(x_combined, y_combined, classifier=model_forest, test_idx=range(105, 150))
+plt.xlabel("Petal Length")
+plt.ylabel("Petal Width")
+plt.legend(loc="upper left")
+plt.tight_layout()
+plt.show()
+save_fig("RandomForest model result using iris data")
