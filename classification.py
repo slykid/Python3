@@ -451,7 +451,9 @@ import numpy as np
 import os
 import time
 
+from sklearn.ensemble import BaggingClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 
@@ -501,6 +503,7 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=42)
 model_forest = RandomForestClassifier(criterion="gini", n_estimators=25, random_state=1, n_jobs=2)
 model_forest.fit(x_train, y_train)
 y_pred = model_forest.predict(x_test)
+print(accuracy_score(y_test, y_pred))
 
 def plot_decision_regions(x, y, classifier, test_idx=None, resolution=0.02):
     markers = ('s', 'x', 'o', '^', 'v')
@@ -543,3 +546,29 @@ plt.legend(loc="upper left")
 plt.tight_layout()
 plt.show()
 save_fig("RandomForest model result using iris data")
+
+## OOB
+bag_clf = BaggingClassifier(RandomForestClassifier(),\
+                            n_estimators=500,\
+                            bootstrap=True,\
+                            n_jobs=1,\
+                            oob_score=True)
+bag_clf.fit(x_train, y_train)
+print(str(round(bag_clf.oob_score_, 4)*100) + "%")  # 94.64%
+
+y_pred = bag_clf.predict(x_test)
+accuracy_score(y_test, y_pred) #  1.0
+
+bag_clf = BaggingClassifier(DecisionTreeClassifier(),\
+                            n_estimators=500,\
+                            bootstrap=True,\
+                            n_jobs=1,\
+                            oob_score=True)
+
+bag_clf.fit(x_train, y_train)
+print(str(round(bag_clf.oob_score_, 4)*100) + "%")  # 95.54%
+
+y_pred = bag_clf.predict(x_test)
+accuracy_score(y_test, y_pred) #  1.0
+
+bag_clf.oob_decision_function_
