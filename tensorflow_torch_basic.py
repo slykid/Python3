@@ -44,8 +44,42 @@ image = train_x[0]
 image.shape  # Out[9]: (28, 28) 입력 뒤에 3이 없다는 의미는 grayscale 의 이미지라는 뜻
 plt.imshow(image, 'gray')  # 이미지 출력
 
+train_x = np.expand_dims(train_x, -1)
+train_x.shape
 
+new_train_x = tf.expand_dims(train_x, -1)
+new_train_x.shape
 
+reshaped = train_x.reshape([60000, 28, 28, 1])
+reshaped.shape
+
+new_train_x = train_x[..., tf.newaxis]
+new_train_x.shape
+
+new_train_x[0]
+plt.imshow(new_train_x[0, :, :, 0 ], "gray")
+plt.imshow(np.squeeze(new_train_x[0]), "gray")
+
+train_y.shape
+train_y[0]
+
+plt.title(train_y[0])
+plt.imshow(train_x[0], "gray")
+plt.show()
+
+## One-hot Encoding
+## 컴퓨터가 이해할 수 있는 형태로 변환해 레이블을 부여하는 방식
+
+# Label : 5
+label = [0,0,0,0,0,1,0,0,0,0]
+
+## keras 에서 변환함수를 제공함
+from tensorflow.keras.utils import to_categorical
+to_categorical(5, 10)  #  array([0., 0., 0., 0., 0., 1., 0., 0., 0., 0.], dtype=float32)
+
+label = train_y[0]
+label_onehot = to_categorical(label, num_classes=10)
+label_onehot
 
 
 # 2. torch 사용법
