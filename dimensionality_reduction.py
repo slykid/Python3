@@ -89,6 +89,7 @@ ax.set_ylabel("$z_2$", fontsize=18, rotation=0)
 ax.axis([-1.5, 1.3, -1.2, 1.2])
 ax.grid(True)
 
+# Swiss roll 예제 시각화
 from sklearn.datasets import make_swiss_roll
 X, t = make_swiss_roll(n_samples=1000, noise=0.2, random_state=42)
 axes = [-11.5, 14, -2, 23, -12, 15]
@@ -120,3 +121,35 @@ plt.axis([4, 15, axes[2], axes[3]])
 plt.xlabel("$z_1$", fontsize=18)
 plt.grid(True)
 plt.show()
+
+# PCA 모델링
+from sklearn.decomposition import PCA
+
+import numpy as np
+import pandas as pd
+
+np.random.seed(4)
+m = 60
+w1, w2 = 0.1, 0.3
+noise = 0.1
+
+angles = np.random.rand(m) * 3 * np.pi / 2 - 0.5
+X = np.empty((m, 3))
+X[:, 0] = np.cos(angles) + np.sin(angles)/2 + noise * np.random.randn(m) / 2
+X[:, 1] = np.sin(angles) * 0.7 + noise * np.random.randn(m) / 2
+X[:, 2] = X[:, 0] * w1 + X[:, 1] * w2 + noise * np.random.randn(m)
+
+X_centered = X - X.mean(axis=0)
+U, s, Vt = np.linalg.svd(X_centered)
+c1 = Vt.T[:, 0]
+c2 = Vt.T[:, 1]
+
+W2 = Vt.T[:, 2]
+X2D = X_centered.dot(W2)
+
+pca = PCA(n_components=2)  # 차원을 2차원으로 줄이는 모델
+x2d = pca.fit_transform(X)  # 모델 학습
+print(pca.components_)
+
+print(pca.explained_variance_ratio_)
+
