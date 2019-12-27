@@ -63,8 +63,10 @@ plt.imshow(np.squeeze(new_train_x[0]), "gray")
 train_y.shape
 train_y[0]
 
+train_x[0].shape
+
 plt.title(train_y[0])
-plt.imshow(train_x[0], "gray")
+plt.imshow(train_x[0, :, :, 0], "gray")
 plt.show()
 
 ## 3) One-hot Encoding
@@ -174,6 +176,28 @@ plt.imshow(act_output[0, :, :, 0], 'gray')
 plt.show()
 
 #### (2) Pooling
+import tensorflow as tf
+import matplotlib.pyplot as plt
+from tensorflow.keras import datasets
+
+import numpy as np
+import pandas as pd
+
+pool_layer = tf.keras.layers.MaxPool2D(pool_size=(2,2), strides=(2,2), padding="SAME")
+pool_output = pool_layer(act_output)
+act_output.shape
+pool_output.shape
+
+plt.figure(figsize=(15, 5))
+plt.subplot(121)
+plt.hist(pool_output.numpy().ravel(), range=[-2, 2])
+plt.ylim(0, 100)
+plt.subplot(122)
+plt.title(pool_output.shape)
+plt.imshow(pool_output[0, :, :, 0], 'gray')
+plt.colorbar()
+plt.show()
+
 
 
 # 2. torch 사용법
