@@ -3,6 +3,143 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
+rand = tf.random.uniform([1], 0, 1)
+print(rand)
+
+rand = tf.random.uniform([4], 0, 1)
+print(rand)
+
+rand = tf.random.normal([4], 0, 1)
+print(rand)
+
+# 신경 구조
+import math
+
+## 활성화함수(시그모이드)
+def sigmoid(x):
+    return 1 / (1 + math.exp(-x))
+
+x = 1 ; y = 0
+w = tf.random.normal([1], 0, 1)
+output = sigmoid(x * w)
+print(output)
+
+for i in range(1000):
+    output = sigmoid(x)
+    error = y - output
+
+    w = w + x * 0.1 * error
+
+    if i % 100 == 99:
+        print(i + 1 , error, output)
+
+# bias 적용한 신경
+x = 0
+y = 1
+w = tf.random.normal([1], 0, 1)
+b = tf.random.normal([1], 0, 1)
+
+for i in range(1000):
+    output = sigmoid(x * w + 1 * b)
+    error = y - output
+    w = w + x * 0.1 * error
+    b = b + 1 * 0.1 * error
+
+    if i % 100 == 99:
+        print(i + 1, error, output)
+
+## 신경망 연산 : AND, OR, XOR
+print(int(True))  # 1
+print(int(False))  # 0
+
+### AND 연산
+x = np.array([[1,1], [1,0], [0,1], [0,0]])
+y = np.array([[1], [0], [0], [0]])
+w = tf.random.normal([2], 0, 1)
+b = tf.random.normal([1], 0, 1)
+b_x = 1
+
+for i in range(2000):
+    error_sum = 0
+
+    for j in range(4):
+        output = sigmoid(np.sum(x[j] * w) + b_x * b)
+        error = y[j][0] - output
+        w = w + x[j] * 0.1 * error
+        b = b + b_x * 0.1 * error
+        error_sum += error
+
+    if i % 200 == 199:
+        print(i + 1, error_sum)
+
+for i in range(4):
+    print('X : ', x[i], ', Y : ', y[i], ', Output : ', sigmoid(np.sum(x[i] * w) + b))
+
+### OR 연산
+x = np.array([[1,1], [1,0], [0,1], [0,0]])
+y = np.array([[1], [1], [1], [0]])
+w = tf.random.normal([2], 0, 1)
+b = tf.random.normal([1], 0, 1)
+b_x = 1
+
+for i in range(2000):
+    error_sum = 0
+
+    for j in range(4):
+        output = sigmoid(np.sum(x[j] * w) + b_x * b)
+        error = y[j][0] - output
+        w = w + x[j] * 0.1 * error
+        b = b + b_x * 0.1 * error
+        error_sum += error
+
+    if i % 200 == 199:
+        print(i + 1, error_sum)
+
+for i in range(4):
+    print('X : ', x[i], ', Y : ', y[i], ', Output : ', sigmoid(np.sum(x[i] * w) + b))
+
+### XOR 연산
+x = np.array([[1,1], [1,0], [0,1], [0,0]])
+y = np.array([[0], [1], [1], [0]])
+w = tf.random.normal([2], 0, 1)
+b = tf.random.normal([1], 0, 1)
+b_x = 1
+
+for i in range(2000):
+    error_sum = 0
+
+    for j in range(4):
+        output = sigmoid(np.sum(x[j] * w) + b_x * b)
+        error = y[j][0] - output
+        w = w + x[j] * 0.1 * error
+        b = b + b_x * 0.1 * error
+        error_sum += error
+
+    if i % 200 == 199:
+        print(i + 1, error_sum)
+print(b)
+for i in range(4):
+    print('X : ', x[i], ', Y : ', y[i], ', Output : ', sigmoid(np.sum(x[i] * w) + b))
+
+## 2-XOR Network
+x = np.array([[1,1], [1,0], [0,1], [0,0]])
+y = np.array([[0], [1], [1], [0]])
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(units=2, activation="sigmoid", input_shape=(2,)),
+    tf.keras.layers.Dense(units=1, activation="sigmoid")
+])
+
+model.compile(optimizer=tf.keras.optimizers.SGD(lr=0.1), loss='mse')
+model.summary()
+
+history = model.fit(x, y, epochs=2000, batch_size=1)
+model.predict(x)
+
+for w in model.weights:
+    print(w)
+
+
 ## 1) Tensor 생성
 # numpy 에서의 array
 a = np.array([1, 2, 3])
@@ -286,9 +423,9 @@ metrics = [tf.keras.metrics.sparse_categorical_accuracy]  # recall, precision �
 opt = tf.keras.optimizers.Adam()
 
 # Compile
-model.compile(optimizer=tf.keras.optimizers.Adam(),
-              loss='sparse_categorical_crossentropy',
-              metrics=[tf.keras.metrics.Accuracy()])
+model.compile(optimizer=opt,
+              loss=loss_func,
+              metrics=metrics)
 
 # check data shape
 train_x.shape, train_y.shape
@@ -323,9 +460,160 @@ hist = model.fit(train_x, train_y,
 
 print(hist)
 
+## 최적화
+import tensorflow as tf
+from tensorflow.keras import layers
+from tensorflow.keras import datasets
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# model
+input_shape = (28, 28, 1)
+num_classes = 10
+
+# tf.keras.backend.set_floatx('float64')
+
+inputs = layers.Input(input_shape, dtype=tf.float64)
+net = layers.Conv2D(32, (3, 3), padding='SAME')(inputs)
+net = layers.Activation('relu')(net)
+net = layers.Conv2D(32, (3, 3), padding='SAME')(net)
+net = layers.Activation('relu')(net)
+net = layers.MaxPooling2D(pool_size=(2, 2))(net)
+net = layers.Dropout(0.5)(net)
+
+net = layers.Conv2D(64, (3, 3), padding='SAME')(net)
+net = layers.Activation('relu')(net)
+net = layers.Conv2D(64, (3, 3), padding='SAME')(net)
+net = layers.Activation('relu')(net)
+net = layers.MaxPooling2D(pool_size=(2, 2))(net)
+net = layers.Dropout(0.5)(net)
+
+net = layers.Flatten()(net)
+net = layers.Dense(512)(net)
+net = layers.Activation('relu')(net)
+net = layers.Dropout(0.5)(net)
+net = layers.Dense(num_classes)(net)  # num_classes
+net = layers.Activation('softmax')(net)
+
+model = tf.keras.Model(inputs=inputs, outputs=net, name='Basic_CNN')
+
+# load datasets
+mnist = tf.keras.datasets.mnist
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+
+x_train = x_train[..., tf.newaxis]
+x_test = x_test[..., tf.newaxis]
+
+x_train, x_test = x_train/255.0, x_test/255.0
+
+# expert 과정(model compile)
+# tf.data 활용
+train_ds = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+train_ds = train_ds.shuffle(1000)
+train_ds = train_ds.batch(32)
+
+test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test))
+test_ds = test_ds.batch(32)  # test 데이터의 경우 shuffle 은 불필요함 (예측을 맞추기 위함이므로)
+
+# visualize data
+for image, label in train_ds.take(2):
+    label = np.array(label,dtype=np.uint8)
+    plt.title(label[0])
+    plt.imshow(image[0, :, :, 0], 'gray')
+    plt.show()
+
+image, label = next(iter(train_ds))
+image.shape, label.shape
+
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy')
+model.fit(train_ds, epochs = 10000)  # fit 할 때 train_ds 와 같이 데이터 셋을 사용하면 이미지 데이터, 레이블, 배치사이즈 까지 설정되었기 때문에 따로 설정할 필요 없음
+
+# expert 과정(loss function & optimizer)
+loss_object = tf.keras.losses.SparseCategoricalCrossentropy()
+optimizer = tf.keras.optimizers.Adam()
+
+train_loss = tf.keras.metrics.Mean(name='train_loss')    # 손실의 평균을 저장함
+train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
+
+test_loss = tf.keras.metrics.Mean(name='test_loss')    # 손실의 평균을 저장함
+test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
+
+#2.0 에서는 세션이 없음
+@tf.function  # 세션여는것 없이 바로 사용가능
+def train_step(images, labels):
+    with tf.GradientTape() as tape:
+        preds = model(images)
+        loss = loss_object(labels, preds)
+    gradients = tape.gradient(loss, model.trainable_variables)
+    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+    
+    train_loss(loss)
+    train_accuracy(labels, preds)
+    
+@tf.function
+def test_step(images, labels):
+    preds = model(images)
+    t_loss = loss_object(labels, preds)
+
+    test_loss(t_loss)
+    test_accuracy(labels, preds)
+
+for epoch in range(2):
+    for images, labels in train_ds:
+        train_step(images, labels)
+
+    for test_images, test_labels in test_ds:
+        test_step(test_images, test_labels)
+
+    template = "Epoch {}, Loss: {}, Accuracy: {}, Test Loss: {}, Test Accuracy: {}"
+    print(template.format(epoch+1,
+                          train_loss.result(),
+                          train_accuracy.result()*100,
+                          test_loss.result(),
+                          test_accuracy.result()*100
+                          ))
+
+# model evaluation
+num_epochs = 1
+batch_size = 64
+
+hist = model.fit(train_x, train_y, batch_size=batch_size, shuffle=True)
+hist.history
+model.evaluate(test_x, test_y, batch_size=batch_size)  # Loss, Accuracy 순으로 출력
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+test_image = test_x[0, :, :, 0]
+test_image.shape
+
+plt.title(test_y[0])
+plt.imshow(test_image, 'gray')
+plt.show()
+
+test_image.shape
+pred = model.predict(test_image.reshape(1, 28, 28, 1))
+pred.shape
+np.argmax(pred)
 
 
+# test batch로
+test_batch = test_x[:32]
+test_batch.shape
 
+preds = model.predict(test_batch)
+preds.shape
+
+np.argmax(preds, -1)  # 32개에 대한 결과를 확인할 때 사용
+
+for i in range(0, len(np.argmax(preds, -1))):
+    plt.imshow(test_batch[i, :, :, 0], 'gray')
+    plt.show()
+
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
 
 # 2. torch 사용법
 import torch
