@@ -614,9 +614,3 @@ for i in range(0, len(np.argmax(preds, -1))):
 
 from tensorflow.python.client import device_lib
 print(device_lib.list_local_devices())
-
-# 2. torch 사용법
-import torch
-
-# torch 버전 확인
-torch.__version__
