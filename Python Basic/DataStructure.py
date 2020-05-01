@@ -9,14 +9,25 @@ c = [1,2,3,4]
 d = [10, 100, "pen", "apple"]
 e = [10, 100, ["pen", "apple"]]
 
+print(a)
+print(b)
+print(c)
+print(d)
+print(e)
+
 ## 인덱싱 & 슬라이싱
-c[2]        # 인덱싱: 해당 순서에 있는 값을 출력
-c[1:3]      # 슬라이싱 : 1이상 3미만에 해당하는 인덱스의 요소를 출력
-c[-3:-1]    # 음수(- 부호)는 리버싱을 의미하며, 역순으로 출력함
-e[2][0]     # 리스트의 요소가 리스트인 경우 리스트 안의 리스트에 있는 값을 출력할 시 다음과 같음.
+print(c[2])        # 인덱싱: 해당 순서에 있는 값을 출력
+print(c[1:3])      # 슬라이싱 : 1이상 3미만에 해당하는 인덱스의 요소를 출력
+print(c[-3:-1])    # 음수(- 부호)는 리버싱을 의미하며, 역순으로 출력함
+print(e[2][0])     # 리스트의 요소가 리스트인 경우 리스트 안의 리스트에 있는 값을 출력할 시 다음과 같음.
+print(d[::-1])
 
 # 2) 사용 함수
 ## append
+marxes = ['Grouncho', 'Chico', 'Harpo']
+marxes.append('Zepo')
+print(marxes)
+
 a.append(1)
 print(a)
 a.append(2)
@@ -32,6 +43,9 @@ a.reverse()
 print(a)
 
 ## insert
+marxes.insert(3, 'Harpo')
+print(marxes)
+
 a.insert(2,7)
 print(a)
 
@@ -52,6 +66,43 @@ a.append(1)
 print(a)
 b = a
 
+marxes = ['Grouncho', 'Chico', 'Zepo', 'Harpo']
+print(marxes)
+marxes.pop()
+print(marxes)
+
+## index
+marxes.index('Chico')
+
+## in
+print('Chico' in marxes)
+print('Chick' in marxes)
+
+## count
+marxes = ['Grouncho', 'Chico', 'Harpo', 'Zepo', 'Harpo']
+marxes.count('Harpo')
+
+## sort(), sorted()
+marxes = ['Grouncho', 'Chico', 'Zepo', 'Harpo']
+print(sorted(marxes))
+marxes.sort()
+print(marxes)
+
+##len()
+marxes = ['Grouncho', 'Chico', 'Zepo', 'Harpo']
+len(marxes)
+
+a = [1,2,3]
+print(a)
+
+b = a
+print(b)
+
+a[0] = 'hello'
+print(a)
+print(b)
+
+
 for i in range(0, len(b)):
     a.pop()
 a.pop()     # IndexError: pop from empty list 발생
@@ -65,9 +116,26 @@ a.append(b) # append와의 차이 : append는 리스트 자체를 하나의 요�
 print(a)
 a.pop()
 
+print(a)
+del a[2]
+print(a)
+
 # 2. 튜플
+tuple1 = ()
+tuple2 = 1,2,3
+
+print(tuple1)
+print(tuple2)
+
 a = (1,2)
 del a[2]    # TypeError: 'tuple' object doesn't support item deletion 발생
+
+password = 'swordfish'
+icecream = 'fruits'
+password, icecream = icecream, password
+
+print(password)
+print(icecream)
 
 # 1) 사용 함수
 ## in
