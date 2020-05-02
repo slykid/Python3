@@ -613,20 +613,3 @@ for i in range(0, len(np.argmax(preds, -1))):
 
 from tensorflow.python.client import device_lib
 print(device_lib.list_local_devices())
-
-#################################################
-from tensorflow import keras
-from tensorflow.keras import layers
-
-try :
-    import tensorflow_datasets as tfds
-except:
-    import os
-    os.system('pip install tensorflow_datasets --user')
-
-    import tensorflow_datasets as tfds
-tfds.disable_progress_bar()
-
-embedding_layer = layers.Embedding(1000, 5)
-result = embedding_layer(tf.constant([1,2,3]))
-result.numpy()

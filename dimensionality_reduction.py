@@ -308,3 +308,236 @@ from sklearn.manifold import LocallyLinearEmbedding
 
 lle = LocallyLinearEmbedding(n_components=2, n_neighbors=10)
 X_reduced = lle.fit_transform(X)
+
+# 실습 1 Wine Data 주성분 추출
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# 데이터셋 로드
+wine = pd.read_csv("https://archive.ics.uci.edu/ml/" 
+                   "machine-learning-databases/wine/wine.data", header=None)
+
+# 훈련, 테스트용 데이터 셋 각각 생성
+# 컬럼 수 : 13개
+x, y = wine.iloc[:, 1:].values, wine.iloc[:, 0].values
+
+# 7:3 으로 데이터 split
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, stratify=y, random_state=0)
+
+# 표준화 처리
+sc = StandardScaler()
+x_train_std = sc.fit_transform(x_train)
+x_test_std = sc.fit_transform(x_test)
+
+# 공분산 계산
+cov = np.cov(x_train_std.T)  # 공분산 행렬 계산
+eigen_vals, eigen_vector = np.linalg.eig(cov)  # 고유값 분해 -> 고유 벡터, 고유값
+
+print('고유값 \n%s' % eigen_vals)
+
+total = sum(eigen_vals)
+exp_val = [(i / total) for i in sorted(eigen_vals, reverse=True)]
+cum_var_exp = np.cumsum(exp_val)
+
+plt.bar(range(1, 14), exp_val, alpha=0.5, align='center', label='Individual Explained Varience')
+plt.step(range(1, 14), cum_var_exp, where='mid', label='Cumulative Explained Varience')
+plt.ylabel('Explained Varience Ratio')
+plt.xlabel('Principal Component Index')
+plt.legend(loc='best')
+plt.tight_layout()
+plt.show()
+plt.savefig('images/dimension_reduction/Variance Sum to Component Index.png')
+
+# 고유 벡터 - 고유값 쌍(튜플형식)으로 구성 후, 내림차순으로 정렬
+eigen_pairs = [(np.abs(eigen_vals[i]), eigen_vector[:, i]) for i in range(len(eigen_vals))]
+eigen_pairs.sort(key=lambda k: k[0], reverse=True)
+print(eigen_pairs)
+
+# 투영 행렬 W 생성
+# 정렬된 것 중에서 가장 큰 고유값 2개와 쌍을 이루는 고유 벡터들을 선택한다. (전체 분산의 약 60% 정도를 사용할 것으로 예상됨)
+# 투영 행렬은 13 x 2  형식의 리스트로 저장함
+w = np.hstack((eigen_pairs[0][1][:, np.newaxis],
+               eigen_pairs[1][1][:, np.newaxis]))
+
+print(w)
+
+# PCA 부분공간 산출하기
+# X' = XW ( 부분공간 : X' / X : 원본 , W : 투영행렬 )
+
+# x_train_std[0].dot(w)  # array([2.38299011, 0.45458499])
+x_train_pca = x_train_std.dot(w)
+
+# 변환된 훈련데이터의 시각화
+colors = ['r', 'g', 'b']
+markers = ['s', 'x', 'o']
+for label, color, marker in zip(np.unique(y_train), colors, markers):
+    plt.scatter(x_train_pca[y_train==label, 0],
+                x_train_pca[y_train==label, 1],
+                c=color, label=label, marker=marker)
+plt.xlabel('PC 1')
+plt.ylabel('PC 2')
+plt.legend(loc='lower left')
+plt.tight_layout()
+plt.show()
+plt.savefig('images/dimension_reduction/wine_dim_reduction_result.png')
+
+
+# LDA (Linear Discriminant Analysis)
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# 데이터셋 로드
+wine = pd.read_csv("https://archive.ics.uci.edu/ml/" 
+                   "machine-learning-databases/wine/wine.data", header=None)
+
+# 훈련, 테스트용 데이터 셋 각각 생성
+# 컬럼 수 : 13개
+x, y = wine.iloc[:, 1:].values, wine.iloc[:, 0].values
+
+# 7:3 으로 데이터 split
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, stratify=y, random_state=0)
+
+# 표준화 처리
+sc = StandardScaler()
+x_train_std = sc.fit_transform(x_train)
+x_test_std = sc.fit_transform(x_test)
+
+# 평균 벡터를 이용한 산포행렬 계산
+# 실행전 y 의 label 갯수 확인
+y_label = set(y_train)
+print(y_label) # 1 ~ 3
+
+np.set_printoptions(precision=4)  # 부동소수점, Array, 기타 numpy 객체가 표시되는 방식을 설정함
+mean_vecs =[]
+for label in range(1, 4):
+    mean_vecs.append(np.mean(x_train_std[y_train == label], axis=0))  # 각 label 별 평균값을 계산
+    print("Mean Vector %s : %s\n" % (label, mean_vecs[label-1]))
+
+d = 13  # 특성 계수
+Sw = np.zeros((d, d))
+for label, mv in zip(range(1, 4), mean_vecs):
+    class_scatter = np.zeros((d, d))
+    for row in x_train_std[y_train == label]:
+        row, mv = row.reshape(d, 1), mv.reshape(d, 1)
+        class_scatter += (row - mv).dot((row - mv).T)
+    Sw += class_scatter
+print("클래스 내의 산포 행렬 : %s x %s" % (Sw.shape[0], Sw.shape[1]))
+print('클래스 레이블 분포 : %s' % np.bincount(y_train)[1:])
+
+Sw = np.zeros(((d, d)))
+for label, mv in zip(range(1, 4), mean_vecs):
+    class_scatter = np.cov(x_train_std[y_train == label].T, bias=True)
+    Sw += class_scatter
+print("스케일 조정된 클래스 내의 산포 행렬 : %s x %s" % (Sw.shape[0], Sw.shape[1]))
+
+mean_class = np.mean(x_train_std, axis=0)
+mean_class = mean_class.reshape(d, 1)
+S_B = np.zeros((d, d))
+for i, mean_vec in enumerate(mean_vecs):
+    n = x_train[y_train == i + 1, :].shape[0]
+    mean_vec = mean_vec.reshape(d, 1)
+    S_B += n * (mean_vec - mean_class).dot((mean_vec - mean_class).T)
+print("클래스 간 산포행렬 : %s x %s" % (S_B.shape[0], S_B.shape[1]))
+
+eigen_vals, eigen_vecs = np.linalg.eig(np.linalg.inv(Sw).dot(S_B))
+eigen_pairs = [(np.abs(eigen_vals[i]), eigen_vecs[:, i]) for i in range(len(eigen_vals))]
+eigen_pairs = sorted(eigen_pairs, key=lambda k: k[0], reverse=True)
+print("내림차순 고유값\n")
+for eigen_val in eigen_pairs:
+    print(eigen_val[0])
+
+total = sum(eigen_vals.real)
+discrimin = [(i / total) for i in sorted(eigen_vals.real, reverse=True)]
+cum_discrimin = np.cumsum(discrimin)
+plt.bar(range(1, 14), discrimin, alpha=0.5, align="center", label="Individual Discriminability")
+plt.step(range(1, 14), cum_discrimin, where="mid", label="Cumulative Discriminability")
+plt.ylabel("Discriminability ratio")
+plt.xlabel("Linear Discriminants")
+plt.ylim([-0.1, 1.1])
+plt.legend(loc="best")
+plt.tight_layout()
+plt.show()
+
+W = np.hstack((eigen_pairs[0][1][:, np.newaxis].real,
+               eigen_pairs[1][1][:, np.newaxis].real))
+print("행렬 W:\n", W)
+
+x_train_lda = x_train_std.dot(W)
+colors = ['r', 'b', 'g']
+markers = ['s', 'x', 'o']
+for l, c, m in zip(np.unique(y_train), colors, markers):
+    plt.scatter(x_train_lda[y_train==l, 0],
+                x_train_lda[y_train==l, 1] * (-1),
+                c=c, label=l, marker=m)
+plt.xlabel("LD 1")
+plt.ylabel("LD 2")
+plt.legend(loc="lower right")
+plt.tight_layout()
+plt.show()
+
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from sklearn.linear_model import LogisticRegression
+
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+from matplotlib.colors import ListedColormap
+
+lda = LDA(n_components=2)
+x_train_lda = lda.fit_transform(x_train_std, y_train)
+
+def plot_decision_regions(x, y, classifier, test_idx=None, resolution=0.02):
+    markers = ('s', 'x', 'o', '^', 'v')
+    colors = ("red", "blue", "lightgreen", "gray", "cyan")
+    cmap = ListedColormap(colors[:len(np.unique(y))])
+
+    x1_min, x1_max = x[:, 0].min() - 1, x[:, 0].max() + 1
+    x2_min, x2_max = x[:, 1].min() - 1, x[:, 1].max() + 1
+
+    xx1, xx2 = np.meshgrid(np.arange(x1_min, x1_max, resolution),
+                           np.arange(x2_min, x2_max, resolution))
+
+    z = classifier.predict(np.array([xx1.ravel(), xx2.ravel()]).T)
+    z = z.reshape(xx1.shape)
+
+    plt.contourf(xx1, xx2, z, alpha=.3, cmap=cmap)
+    plt.xlim(xx1.min(), xx1.max())
+    plt.ylim(xx2.min(), xx2.max())
+
+    for idx, cl in enumerate(np.unique(y)):
+        plt.scatter(x = x[y == cl, 0], y = x[y == cl, 1],
+                    alpha=0.8, c=colors[idx], marker=markers[idx],
+                    label=cl, edgecolors="black")
+
+    if test_idx:
+        x_test, y_test = x[test_idx, :], y[test_idx]
+
+        plt.scatter(x_test[:, 0], x_test[:, 1],
+                    c='', edgecolors="black", alpha=1.0,
+                    linewidth=1, marker="o",
+                    s=100, label="test set")
+
+lr = LogisticRegression(solver="liblinear", multi_class="auto")
+lr = lr.fit(x_train_lda, y_train)
+plot_decision_regions(x_train_lda, y_train, classifier=lr)
+plt.xlabel("LD 1")
+plt.ylabel("LD 2")
+plt.legend(loc="lower left")
+plt.tight_layout()
+plt.show()
+
+x_test_lda = lda.transform(x_test_std)
+plot_decision_regions(x_test_lda, y_test, classifier=lr)
+plt.xlabel("LD 1")
+plt.ylabel("LD 2")
+plt.legend(loc="lower left")
+plt.tight_layout()
+plt.show()
