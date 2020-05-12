@@ -473,9 +473,7 @@ import matplotlib.pyplot as plt
 input_shape = (28, 28, 1)
 num_classes = 10
 
-# tf.keras.backend.set_floatx('float64')
-
-inputs = layers.Input(input_shape, dtype=tf.float64)
+inputs = layers.Input(input_shape)
 net = layers.Conv2D(32, (3, 3), padding='SAME')(inputs)
 net = layers.Activation('relu')(net)
 net = layers.Conv2D(32, (3, 3), padding='SAME')(net)
@@ -498,6 +496,7 @@ net = layers.Dense(num_classes)(net)  # num_classes
 net = layers.Activation('softmax')(net)
 
 model = tf.keras.Model(inputs=inputs, outputs=net, name='Basic_CNN')
+model.summary()
 
 # load datasets
 mnist = tf.keras.datasets.mnist
@@ -614,9 +613,3 @@ for i in range(0, len(np.argmax(preds, -1))):
 
 from tensorflow.python.client import device_lib
 print(device_lib.list_local_devices())
-
-# 2. torch 사용법
-import torch
-
-# torch 버전 확인
-torch.__version__
