@@ -16,12 +16,13 @@ client_id = "W4MTiNOZaTlRKmizQYSq" #YOUR_CLIENT_ID
 client_secret = "xIUKcSqDba" #YOUR_CLIENT_SECRET
 
 # 데이터 로드
-# data = pd.read.csv()
+# S020 = pd.read_csv("C:\\Users\\nice\Downloads\\STORE_ADDR_2004.tab", sep="\t", encoding="euc-kr")
+# data = S020[["가맹점명", "가맹점주소"]]
+# data = data.rename({"store_nm" : "가맹점명", "addr" : "가맹점주소"}, axis=1)
 
 ## 샘플데이터
 data = pd.read_csv("data/scrapInput.csv", encoding="euc-kr")
 data = data.rename({"STORE_NM" : "store_nm", "ADDR" : "addr", "UPJONG_DESC" : "upjong_desc"}, axis=1)
-
 
 # 검색 리스트 생성
 searchList = []
@@ -224,3 +225,4 @@ if datetime.datetime.now().month < 10:
     resultDF.to_csv("result/S020/naverapi_result_%d0%d.csv" % ((datetime.datetime.now().year), (datetime.datetime.now().month)), index=False, encoding="utf8")
 else:
     resultDF.to_csv("result/S020/naverapi_result_%d%d.csv" % ((datetime.datetime.now().year), (datetime.datetime.now().month)), index=False, encoding="utf8")
+
