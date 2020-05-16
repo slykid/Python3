@@ -2,7 +2,7 @@ import numpy as np
 import sys
 
 class NeuralNetMLP(object):
-    def __init__(self, n_hidden=30, l2=0, epochs=100, eta=0.001, shuffle=True, minibatch_size=1, seed=None):
+    def __init__(self, n_hidden=30, l2=0., epochs=100, eta=0.001, shuffle=True, minibatch_size=1, seed=None):
         """
         :param n_hidden: 은닉 유닛 수 / int
         :param l2: L2 규제의 람다 값 / float
@@ -34,7 +34,7 @@ class NeuralNetMLP(object):
 
     # 시그모이드 함수
     def _sigmoid(self, z):
-        return 1 / (1. + np.exp( -np.clip(z, -250, 250) ) )
+        return 1. / (1. + np.exp(-np.clip(z, -250, 250)))
 
     # 정방향 전파 (Feed-Forward Progagation)
     def _forward(self, x):
@@ -53,8 +53,8 @@ class NeuralNetMLP(object):
         :param output: 출력층의 활성화 출력 / 배열 ( 크기 = [n_samples, n_output_units]
         :return: cost (규제가 포함된 비용) / float
         """
-        L2_term = (self.l2 + (np.sum(self.w_h ** 2.) + np.sum(self.w_out ** 2.)))
-        term1 = -y_enc + np.log(output)
+        L2_term = (self.l2 * (np.sum(self.w_h ** 2.) + np.sum(self.w_out ** 2.)))
+        term1 = -y_enc * (np.log(output))
         term2 = (1. - y_enc) * np.log(1. - output)
         cost = np.sum(term1 - term2) + L2_term
 
@@ -93,6 +93,7 @@ class NeuralNetMLP(object):
 
         epoch_strlen = len(str(self.epochs))
         self.eval_ = {'cost' : [], 'train_acc' : [], 'valid_acc' : []}
+
         y_train_enc = self._onehot(y_train, n_output)
 
         # 훈련
@@ -107,35 +108,33 @@ class NeuralNetMLP(object):
             for start_idx in range(0, indices.shape[0] - self.minibatch_size + 1, self.minibatch_size):
                 batch_idx = indices[start_idx : (start_idx + self.minibatch_size)]
 
+                # 정방향 계산
+                z_h, a_h, z_out, a_out = self._forward(x_train[batch_idx])
 
-            # 정방향 계산
-            z_h, a_h, z_out, a_out = self._forward(x_train[batch_idx])
+                # 역전파 계산
+                sigma_out = a_out - y_train_enc[batch_idx]
+                sigmoid_derivative_h = a_h * (1. - a_h)
 
+                sigma_h = (np.dot(sigma_out, self.w_out.T) * sigmoid_derivative_h)
 
-            # 역전파 계산
-            sigma_out = a_out - y_train_enc[batch_idx]
-            sigmoid_derivative_h = a_h * (1. - a_h)
+                ## 그레디언트 계산
+                grad_w_h = np.dot(x_train[batch_idx].T, sigma_h)
+                grad_b_h = np.sum(sigma_h, axis=0)
 
-            sigma_h = (np.dot(sigma_out, self.w_out.T) * sigmoid_derivative_h)
-
-            ## 그레디언트 계산
-            grad_w_h = np.dot(x_train[batch_idx].T, sigma_h)
-            grad_b_h = np.sum(sigma_h, axis=0)
-
-            grad_w_out = np.dot(a_h.T, sigma_out)
-            grad_b_out = np.sum(sigma_out, axis=0)
+                grad_w_out = np.dot(a_h.T, sigma_out)
+                grad_b_out = np.sum(sigma_out, axis=0)
 
 
-            ## 규제 및 가중치 업데이트
-            delta_w_h = grad_w_h + self.l2 * self.w_h
-            delta_b_h = grad_b_h
-            self.w_h -= self.eta * delta_w_h
-            self.b_h -= self.eta * delta_b_h
+                ## 규제 및 가중치 업데이트
+                delta_w_h = (grad_w_h + self.l2 * self.w_h)
+                delta_b_h = grad_b_h
+                self.w_h -= self.eta * delta_w_h
+                self.b_h -= self.eta * delta_b_h
 
-            delta_w_out = grad_w_out + self.l2 * self.w_out
-            delta_b_out = grad_b_out + self.l2 * self.b_out
-            self.w_out -= self.eta * delta_w_out
-            self.b_out -= self.eta * delta_b_out
+                delta_w_out = grad_w_out + self.l2 * self.w_out
+                delta_b_out = grad_b_out
+                self.w_out -= self.eta * delta_w_out
+                self.b_out -= self.eta * delta_b_out
 
             # 평가
             z_h, a_h, z_out, a_out = self._forward(x_train)
@@ -150,8 +149,6 @@ class NeuralNetMLP(object):
             sys.stderr.write("%0*d/%d | 비용: %.2f | 훈련/검증 정확도 : %.2f%%/%.2f%%\n" % (epoch_strlen, i+1, self.epochs, cost, train_acc*100, valid_acc*100))
 
             sys.stderr.flush()
-
-            # print('%0*d/%d | 비용: %.2f | 훈련/검증 정확도 : %.2f%%/%.2f%%' % (epoch_strlen, i+1, self.epochs, cost, train_acc*100, valid_acc*100))
 
             self.eval_['cost'].append(cost)
             self.eval_['train_acc'].append(train_acc)

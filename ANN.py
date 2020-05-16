@@ -220,3 +220,37 @@ nn._fit(
             x_valid=x_train[55000:],
             y_valid=y_train[55000:]
         )
+
+# 비용함수 출력
+plt.plot(range(nn.epochs), nn.eval_['cost'])
+plt.xlabel('Epochs')
+plt.ylabel('Cost')
+plt.show()
+
+# 모델 정확도 출력
+plt.plot(range(nn.epochs), nn.eval_['train_acc'], label='training')
+plt.plot(range(nn.epochs), nn.eval_['valid_acc'], label='validation', linestyle='--')
+plt.ylabel('Accuracy')
+plt.xlabel('Epochs')
+plt.legend()
+plt.show()
+
+y_test_pred = nn._predict(x_test)
+acc = (np.sum(y_test - y_test_pred).astype(np.float) / x_test.shape[0])
+print('테스트 정확도: %.2f%%' % (acc * 100))
+
+
+
+n_epochs = 200
+nn = NeuralNetMLP(n_hidden=100,
+                  l2=0.01,
+                  epochs=n_epochs,
+                  eta=0.0005,
+                  minibatch_size=100,
+                  shuffle=True,
+                  seed=1)
+
+nn.fit(X_train=x_train[:55000],
+       y_train=y_train[:55000],
+       X_valid=x_train[55000:],
+       y_valid=y_train[55000:])
