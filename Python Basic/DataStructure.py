@@ -180,103 +180,61 @@ print(dict2)
 dict2.update(dict1)
 print(dict2)
 
-## del
-print(dict2)
+## 출력
+a["name"]
+print(a.get("name"))
+print(a.get("address")) # 키에 대한 값이 없는 경우 None을 반환, 자료에 대한 조회시 이용하면 좋음
+print(c["arr"][2])
 
-del dict2[0]
-print(dict2)
+## 데이터 추가
+a["address"] = "Seoul"
+print(a.get("address"))
 
-del dict2['birth']
-print(dict2)
-
-## clear
-dict2.clear()
-print(dict2)
-
-## in
-print(dict1)
-print('name' in dict1)
-
-
+a["rank"] = [1, 3, 6]
+a["rank2"] = (1, 5, 7)
+print(a)
 
 ## Keys, Values, Items
 ### Item : Key-Value 쌍을 의미
 a = {"name":"Kilhyun" , "HP":"010-1234-5678", "birth":"2015-12-01"}
-print(dict1.keys())     # 딕셔너리에 존재하는 모든 Key 를 출력함
-print(dict1.values())   # 딕셔너리에 존재하는 모든 Value 를 출력함
-print(dict1.items())    # 딕셔너리에 존재하는 모든 Item(Key-Value 쌍, 튜플형식) 를 출력함
-
-print(dict1.keys().__class__)
-list_key = list(dict1.keys())
-print(list_key)
-print(list_key.__class__)
-
-print(dict1.values().__class__)
-list_value = list(dict1.values())
-print(list_value)
-print(list_value.__class__)
-
-print(dict1.items().__class__)
-list_item = list(dict1.items())
-print(list_item)
-print(list_item.__class__)
-print(list_item[0])
-print(list_item[0].__class__)
-
-set1 = {'hello', 'world'}
-print(set1)
-print(set1.__class__)
-
-set1 = set('letter')
-set2 = set( ['Hello', 'World', 1, 2, 3] )
-set3 = set( ('Kim', 'Lee', 'Park') )
-set4 = set( dict1 )
-
-print(set1)
-print(set2)
-print(set3)
-print(set4)
-
-drinks = {
-    'martini' : {'vodka', 'vermouth'},
-    'black_russian' : {'vodka', 'kahlua'},
-    'white_russian' : {'vodka', 'cream', 'kahlua'},
-    'manhattan' : {'rye', 'vermouth', 'bitters'},
-    'screwdriver' : {'orange juice', 'vodka'}
-}
-
-for name, contents in drinks.items():
-    if 'vodka' in contents:
-        print(name)
-
-for name, contents in drinks.items():
-    if contents & {'vermouth', 'orange juice'}:
-        print(name)
-
-for name, contents in drinks.items():
-    if contents | {'vermouth', 'orange juice'}:
-        print(name)
-
-bruss = drinks['black_russian']
-wruss = drinks['white_russian']
-
-print(bruss)
-print(wruss)
-
-print(bruss & wruss)
-print(bruss | wruss)
-print(bruss - wruss)
-print(wruss - bruss)
-print(bruss ^ wruss)
-print(bruss <= wruss)
-
-print(wruss >= bruss)
-wruss.issuperset(bruss)
+print(a.keys())     # 딕셔너리에 존재하는 모든 Key 를 출력함
+print(a.values())   # 딕셔너리에 존재하는 모든 Value 를 출력함
+print(a.items())    # 딕셔너리에 존재하는 모든 Item(Key-Value 쌍, 튜플형식) 를 출력함
 
 
+# 컴프리헨션
+## 1) 리스트 컴프리헨션
+list_1 = []
+list_1.append(1)
+list_1.append(2)
+list_1.append(3)
+list_1.append(4)
+list_1.append(5)
+print(list_1)    # [1, 2, 3, 4, 5]
 
+list_2 = []
+for i in range(5):
+    list_2.append(i+1)
 
+print(list_2)
 
+list_3 = [x+1 for x in range(5)]
+print(list_3)
 
+list_3 = []
+list_3 = [x+1 for x in range(5) if (x + 1) % 2 == 1]
+print(list_3)
 
+rows = range(1, 4)
+cols = range(1, 3)
+cells = [(row, col) for row in rows for col in cols]
+print(cells)
 
+for row, col in cells:
+    print(row, col)
+
+## 2) 딕셔너리 컴프리헨션
+word = 'letters'
+letters_count = {letter: word.count(letter) for letter in set(word)}
+# letters_count = {letter: word.count(letter) for letter in word}
+print(letters_count)
