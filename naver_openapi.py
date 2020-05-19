@@ -16,19 +16,21 @@ client_id = "W4MTiNOZaTlRKmizQYSq" #YOUR_CLIENT_ID
 client_secret = "xIUKcSqDba" #YOUR_CLIENT_SECRET
 
 # 데이터 로드
-# S020 = pd.read_csv("C:\\Users\\nice\Downloads\\STORE_ADDR_2004.tab", sep="\t", encoding="euc-kr")
-# data = S020[["가맹점명", "가맹점주소"]]
+S020 = pd.read_csv("C:\\Users\\nice\Downloads\\STORE_ADDR_2004.tab", sep="\t", encoding="euc-kr")
+data = S020[["가맹점명", "가맹점주소"]]
+data.columns = ["store_nm", "addr"]
+data = data[0:26000]
 # data = data.rename({"store_nm" : "가맹점명", "addr" : "가맹점주소"}, axis=1)
 
 ## 샘플데이터
-data = pd.read_csv("data/scrapInput.csv", encoding="euc-kr")
-data = data.rename({"STORE_NM" : "store_nm", "ADDR" : "addr", "UPJONG_DESC" : "upjong_desc"}, axis=1)
+# data = pd.read_csv("data/scrapInput.csv", encoding="euc-kr")
+# data = data.rename({"STORE_NM" : "store_nm", "ADDR" : "addr", "UPJONG_DESC" : "upjong_desc"}, axis=1)
 
 # 검색 리스트 생성
 searchList = []
 for i in range(0, len(data["store_nm"])):
     addr = ''
-    if re.search("-", data["addr"][i]) is not None:
+    if re.search("-", data["addr"][i].split(",")[0]) is not None:
         if eq(data["addr"][i].split(",")[0].split("-")[1], '0'):
            addr = data["addr"][i].split(",")[0].split("-")[0]
         else :
@@ -50,6 +52,7 @@ for i in range(0, len(data["store_nm"])):
 # 검색 횟수
 # - request - response 한 횟수 만큼 증가
 # - 1일 최대 25000건 한도
+# - 수동 조작 부분을 변경 예정
 start_time = datetime.datetime.now()  # 시작시간
 done_time = ""
 if len(searchList) < 25000:
@@ -103,7 +106,8 @@ if len(searchList) < 25000:
             time.sleep(5)
 
 else :
-    for i in range(25000):
+    for i in range(0,25000):
+    # for i in range(3441, 25000):
         query = searchList[i]
 
         encText = urllib.parse.quote(query)  # 검색어 인코딩
@@ -216,6 +220,9 @@ for i in range(len(resultDF["title"])):
     if resultDF["title"][i] is not None:
         # title 문자열 중 html 태그 제거
         resultDF["title"][i] = re.sub("<b>|</b>|J&amp;", "", resultDF["title"][i])
+
+print(len(resultDF["title"]))
+print(len(data['store_nm']) == len(resultDF["title"]))
 
 if os.path.isdir("result/S020") is False:
     os.makedirs("result/S020")
