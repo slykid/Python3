@@ -32,7 +32,6 @@ References:
                  Christopher M. Bishop, section 4.3.2
 
 """
-__docformat__ = 'restructedtext en'
 
 import pickle
 import gzip

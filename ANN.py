@@ -236,7 +236,7 @@ plt.legend()
 plt.show()
 
 y_test_pred = nn._predict(x_test)
-acc = (np.sum(y_test - y_test_pred).astype(np.float) / x_test.shape[0])
+acc = (np.sum(y_test == y_test_pred).astype(np.float) / x_test.shape[0])
 print('테스트 정확도: %.2f%%' % (acc * 100))
 
 
