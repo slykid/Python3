@@ -238,3 +238,20 @@ word = 'letters'
 letters_count = {letter: word.count(letter) for letter in set(word)}
 # letters_count = {letter: word.count(letter) for letter in word}
 print(letters_count)
+
+## 3) 셋 컴프리헨션
+set_a = {num for num in range(1, 6) if num % 3 == 1}
+print(set_a)
+
+## 4) 제너레이터 컴프리헨션
+def gen_range(first=0, last=10, step=1):
+    num = first
+    while num < last:
+        yield num
+        num += step
+
+gen_range  # 함수 실행
+range_result = gen_range(1, 5)
+
+for x in range_result:
+    print(x)
