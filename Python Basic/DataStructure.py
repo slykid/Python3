@@ -255,3 +255,15 @@ range_result = gen_range(1, 5)
 
 for x in range_result:
     print(x)
+
+import re
+
+r = re.compile("[단팥]")
+r.search("단팥빵")
+r.search("팥빵")
+r.search("만쥬")
+r.search("팥죽")
+# r.search("kkkw")
+
+re.search("[^ap]", "apple")
+re.search("[0-9]{3}-[0-9]{3,4}-[0-9]{4}", "010-1234-4567")
