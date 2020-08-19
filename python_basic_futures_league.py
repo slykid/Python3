@@ -41,5 +41,8 @@ for i in range(len(df_player["MONEY"])):
     elif re.search("만원", df_player["MONEY"][i]) is not None:
         df_player["MONEY_KOR"][i] = int(re.sub("만원", "", df_player["MONEY"][i]))
 
-
-
+# Q6. 2020.05.05 일에 출전하는 선수에 대한 정보를 선발여부(ENTRY_YN)와 함께 entry_player_20200505 에 저장하시오.
+entry_player_20200505 = pd.merge(df_entry, df_player, left_on="P_ID", right_on="PCODE")
+entry_player_20200505 = entry_player_20200505.iloc[np.where(entry_player_20200505.GDAY_DS == 20200505)]
+entry_player_20200505 = entry_player_20200505.iloc[np.where(entry_player_20200505.ENTRY_YN == "Y")]
+entry_player_20200505
