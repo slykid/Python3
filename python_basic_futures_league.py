@@ -20,7 +20,7 @@ print(df_pitcher.dtypes)
 
 # Q3. 개인타자 중 SK 소속인 타자들의 ID(P_ID)를 df_hitter_sk 에 저장하시오.
 #     (컬럼명은 P_ID 로 지정한다.)
-df_hitter_sk = pd.DataFrame(df_hitter.iloc[np.where(df_hitter.T_ID=='SK')]["P_ID"])
+df_hitter_sk = pd.DataFrame(df_hitter.iloc[np.where(df_hitter.T_ID == 'SK')]["P_ID"])
 
 # Q4. 개인타자 중 타율(HIT)이 3.0 이상인 타자들만 df_hitter_3_0 에 저장하고 인덱스를 재설정하시오.
 #     재설정 시에는 df.reset_index() 를 사용하며, 사용 후에는 index 라는 컬럼이 생성됨
