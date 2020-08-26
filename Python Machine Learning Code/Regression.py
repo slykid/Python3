@@ -78,7 +78,17 @@ plt.show()
 # - train : test = 7 : 3 의 비율로 분할
 
 # 방법1. 직접 전체 데이터를 7:3 으로 분할
+len(df_data["RM"])  # 506
+x_train = df_data["RM"][0 : round(len(df_data["RM"]) * 0.7)]
+x_test = df_data["RM"][round(len(df_data["RM"]) * 0.7):len(df_data["RM"])]
 
+y_train = df_data["Price"][0 : round(len(df_data["Price"]) * 0.7)]
+y_test = df_data["Price"][round(len(df_data["Price"]) * 0.7):len(df_data["Price"])]
+
+len(x_train)
+len(x_test)
+len(y_train)
+len(y_test)
 
 # 방법2. train_test_split() 으로 분할하기
 ## 1) array() 함수로 데이터프레임 -> ndarray 형변환 하는 경우
@@ -100,8 +110,7 @@ x_test = x_test[:, np.newaxis]
 model1 = LinearRegression()
 
 # 학습하기
-# model1.fit(train.RM, train.Price) # 방법 1
-model1.fit(x_train, y_train)      # 방법 2
+model1.fit(x_train, y_train)
 
 # 예측값 산출하기
 y_pred = model1.predict(x_test)
@@ -119,3 +128,4 @@ print("Fomula : Price ~ " + str(model1.coef_[0]) + " * RM + " + str(model1.inter
 # 회귀 모형 성능평가하기
 res = sm.ols(data=df_data, formula="Price ~ RM").fit()
 res.summary()
+# 471.8
