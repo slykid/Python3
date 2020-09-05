@@ -129,3 +129,24 @@ print("Fomula : Price ~ " + str(model1.coef_[0]) + " * RM + " + str(model1.inter
 res = sm.ols(data=df_data, formula="Price ~ RM").fit()
 res.summary()
 # 471.8
+
+# 잔차 분석
+# 성능평가
+x = df_data.iloc[:, :-1].values
+y = df_data['Price'].values
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=0)
+model = LinearRegression()
+model.fit(x_train, y_train)
+y_train_pred = model.predict(x_train)
+y_test_pred = model.predict(x_test)
+
+plt.scatter(y_train_pred, y_train_pred - y_train, c='steelblue', marker='o', edgecolors='white', label='Training Data')
+plt.scatter(y_test_pred, y_test_pred - y_test, c='limegreen', marker='s', edgecolors='white', label='Test Data')
+plt.xlabel("Predicted Values")
+plt.ylabel("Residual")
+plt.legend(loc="upper left")
+plt.hlines(y=0, xmin=-10, xmax=50, color='black', lw=2)
+plt.xlim([-10,50])
+plt.tight_layout()
+plt.show()
+

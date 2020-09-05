@@ -66,7 +66,7 @@ model2 = LinearRegression()
 model2.fit(x_train, y_train)
 y_pred2 = model2.predict(x_test)
 
-result = ols(data=data, formula="charges ~ age + bmi + children + smoker + region").fit()
+result = ols(data=data, formula="charges ~ .").fit()
 print(result.summary())
 # R-squared:                       0.751
 # Adj. R-squared:                  0.750

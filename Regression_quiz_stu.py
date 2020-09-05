@@ -16,7 +16,6 @@ import seaborn as sb
 #    자동차의 평균 연비를 m 이라고 할 때, 위의 가설검정에 대한 귀무가설과 대립가설을 작성하시오.
 
 
-
 # Q. 미국 환자 의료 보험비를 선형회귀모델을 이용해 예측하고, 어떤 변수를 사용해야 되는지 최적화된 회귀식을 도출하도록 분석하시오.
 
 # 컬럼 정보
@@ -43,14 +42,14 @@ data["region"].replace({"northeast":1, "northwest":2, "southeast":3, "southwest"
 sb.pairplot(data[["age", "bmi", "children", "charges"]])
 
 # 학습, 테스트 데이터 생성
-x_train, x_test, y_train, y_test = train_test_split(, , test_size=0.3, random_state=42)
+x_train, x_test, y_train, y_test = train_test_split(data[["age", "sex", "bmi", "children", "smoker", "region"]].to_numpy(), data["charge"].to_numpy(), test_size=0.3, random_state=42)
 
-model =
-model.fit(,)
-y_pred = model.predict()
+model = LinearRegression()
+model.fit(x_train, y_train)
+y_pred = model.predict(x_test)
 
 # 모델 성능확인
-result = ols(data=, formula="").fit()
+result = ols(data=data, formula="charges ~ age + sex + bmi + children + smoker + region").fit()
 print(result.summary())
 # R-squared:
 # Adj. R-squared:
