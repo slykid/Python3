@@ -18,7 +18,7 @@ client_secret = "xIUKcSqDba" #YOUR_CLIENT_SECRET
 
 # 데이터 로드
 # data = pd.read_excel("data/202006_API작업.xlsx", encoding="euc-kr")
-data = pd.read_csv("data/naver_api_202008.csv", encoding="utf-8")
+data = pd.read_csv("data/naver_api_202009.csv", encoding="utf-8")
 
 ## 샘플데이터 #1
 # test = pd.read_csv("C:\\Users\\nice\Downloads\\STORE_ADDR_2004.tab", sep="\t", encoding="euc-kr")
@@ -62,7 +62,7 @@ for i in range(0, len(data["store_nm"])):
 start_time = datetime.datetime.now()  # 시작시간
 done_time = ""
 cnt = 0
-for i in range(28363, len(searchList)):
+for i in range(15923, len(searchList)):
     query = searchList[i]
 
     encText = urllib.parse.quote(query)  # 검색어 인코딩
@@ -134,17 +134,17 @@ for i in range(len(resultDF["title"])):
     if resultDF["category"][i] is not None:
         notNoneCnt += 1
 
-# 결과 파일 생성
-if datetime.datetime.now().month < 10:
-    res.to_csv("result/S020/naverapi_result_%d0%d.csv" % ((datetime.datetime.now().year), (datetime.datetime.now().month)), index=False)
-else:
-    res.to_csv("result/S020/naverapi_result_%d%d.csv" % ((datetime.datetime.now().year), (datetime.datetime.now().month)), index=False)
-
 cnt = 0
 for i in range(len(resultDF["title"])):
     if eq(res["store_nm"][i], searchList[i].split(" ")[0]) is False:
         print(i , searchList[i], res["store_nm"][i])
         break
+
+# 결과 파일 생성
+if datetime.datetime.now().month < 10:
+    res.to_csv("result/S020/naverapi_result_%d0%d.csv" % ((datetime.datetime.now().year), (datetime.datetime.now().month)), index=False)
+else:
+    res.to_csv("result/S020/naverapi_result_%d%d.csv" % ((datetime.datetime.now().year), (datetime.datetime.now().month)), index=False)
 
 
 
