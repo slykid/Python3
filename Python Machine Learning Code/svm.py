@@ -81,13 +81,13 @@ df_iris_scaler = pd.DataFrame(scaler.fit_transform(df_iris.iloc[:, 0:4]), column
 
 # Iris-Virginica 여부를 확인하기 위한 Flag 생성
 # - Iris-Virginica = 2 임
-df_iris_scaler["virginica_YN"] = (df_iris["species"] == ).astype(np.float64) # Y = 1 / N = 0
+df_iris_scaler["virginica_YN"] = (df_iris["species"]==2).astype(np.float64) # Y = 1 / N = 0
 
 # 학습, 테스트 용 데이터 생성
 # 학습 : 테스트 = 7 : 3
-x_train, x_test, y_train, y_test = train_test_split(,
-                                                    ,
-                                                    test_size = 0.3, random_state=42)
+x_train, x_test, y_train, y_test = train_test_split(df_iris_scaler.iloc[:, 0:4].to_numpy(),
+                                                    df_iris_scaler["virginica_YN"].to_numpy(),
+                                                    test_size=0.3, random_state=42)
 
 # 모델 학습
 # 일반적으로 SVM 은 선형 SVM이므로 'linear' 모델로 생성
