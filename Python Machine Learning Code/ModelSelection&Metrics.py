@@ -201,7 +201,7 @@ plt.show()
 #############################################
 import numpy as np
 import pandas as pd
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, plot_confusion_matrix
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -227,7 +227,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, strati
 pipe_svc = make_pipeline(StandardScaler(),
                          SVC(random_state=1))
 pipe_svc.fit(X_train, y_train)
+
 y_pred = pipe_svc.predict(X_test)
+
 cm = confusion_matrix(y_true=y_test, y_pred=y_pred)
 print(cm)
 
@@ -243,6 +245,8 @@ plt.ylabel('True label')
 
 plt.tight_layout()
 plt.show()
+
+plot_confusion_matrix(pipe_svc, X_test, y_test)
 
 #############################################
 # Metrics                                   #
