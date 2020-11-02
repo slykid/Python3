@@ -82,3 +82,16 @@ for i in range(1000):
 
     if i % 100 == 99:
         print(i+1, error, output)
+
+## 3) keras
+import tensorflow as tf
+from tensorflow import keras
+
+CLASSES = 10
+RESHAPE = 784
+
+model = tf.keras.models.Sequential()
+model.add(keras.layers.Dense(CLASSES, input_shape=(RESHAPE,),
+          kernel_initializer='zeros', name='dense_layer', activation='softmax'))
+print(model.summary())
+
