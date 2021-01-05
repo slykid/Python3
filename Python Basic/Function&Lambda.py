@@ -8,7 +8,7 @@
 #     code
 
 # 3) 함수 사용
-# function_naem(parameter)
+# function_name(parameter)
 
 # 함수 사용 시 선언하는 위치가 중요함
 # - 반드시 선언을 먼저 해주고 그 다음 실행해줘야함
@@ -135,5 +135,42 @@ func_final(10, 10, lambda_mul_10)
 
 print(func_final(10, 10, lambda x : x * 1000))  # 출력 시 None 이 나오는 이유: 더이상 출력할 것이 없어서 None 이 출력됨 
  
+# 3. 내장함수
+# 함수 내에 또다른 함수를 정의하는 것으로 루프나 코드 중복을 피하기 위해
+# 또 다른 함수 내에서 복잡한 작업을 한 번 이상 수행하고자 할 때 사용함
+def outer(a, b):
+    def inner(c, d):
+        return c+d
+    return inner(a, b)
 
+print(outer(4, 7))
 
+## nonlocal
+def outFunc(x):
+    y = 10
+    def inFunc():
+        x = 1000
+        return x
+    return inFunc()
+
+print(outFunc(10))
+
+def count(x):
+    def increment():
+        nonlocal x  # x가 로컬이 아닌 nonlocal의 변수임을 확인한다.
+        x += 1
+        print(x)
+
+    increment()
+
+count(5)
+
+# closure
+def knight(saying):
+    def inner():
+        return f'We are the knights who say: {saying}'
+    return inner
+
+duck = knight('Duck')
+print(duck)
+print(duck())
