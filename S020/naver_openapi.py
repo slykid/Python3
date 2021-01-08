@@ -18,7 +18,9 @@ client_secret = "xIUKcSqDba" #YOUR_CLIENT_SECRET
 
 # 데이터 로드
 # data = pd.read_excel("data/202006_API작업.xlsx", encoding="euc-kr")
-data = pd.read_csv("data/naver_api_202009.csv", encoding="utf-8")
+data = pd.read_csv("data/naver_api_202101.csv", encoding="utf-8")
+# data = pd.read_csv("data/only_mango.csv", encoding="euc-kr")
+# data = pd.read_csv("data/diff_jibun.csv", encoding="euc-kr")
 
 ## 샘플데이터 #1
 # test = pd.read_csv("C:\\Users\\nice\Downloads\\STORE_ADDR_2004.tab", sep="\t", encoding="euc-kr")
@@ -29,7 +31,11 @@ data = pd.read_csv("data/naver_api_202009.csv", encoding="utf-8")
 
 ## 샘플데이터 #2
 # data = pd.read_csv("data/scrapInput.csv", encoding="euc-kr")
-# data = data.rename({"STORE_NM" : "store_nm", "ADDR" : "addr", "UPJONG_DESC" : "upjong_desc"}, axis=1)
+# data_mango = data[["restaurant_key", "restaurant_name", "restaurant_branch_name", "address"]]
+# data_mango = data_mango.rename({"restaurant_name" : "store_nm", "address" : "addr", "restaurant_key" : "store_no", "restaurant_branch_name" : "store_branch_name"}, axis=1)
+
+# data_zini = data[["restaurant_key", "restaurant_name", "restaurant_branch_name", "zini_addr"]]
+# data_zini = data_zini.rename({"restaurant_name" : "store_nm", "zini_addr" : "addr", "restaurant_key" : "store_no", "restaurant_branch_name" : "store_branch_name"}, axis=1)
 
 data["store_no"] = data["store_no"].astype(int)
 data["store_nm"] = data["store_nm"].astype(str)
@@ -45,6 +51,25 @@ for i in range(0, len(data["store_nm"])):
         searchList.append(data["store_nm"][i])
     else:
         searchList.append(data["store_nm"][i] + " " + data["addr"][i])
+
+# searchList = []
+# for i in range(0, len(data["store_nm"])):
+#     if eq(data["addr"][i], "nan"):
+#         data["addr"][i] = ""
+#
+#     if eq(data["store_branch_name"][i], "nan"):
+#         data["store_branch_name"][i] = ""
+#     try :
+#         if np.isnan(data["store_branch_name"][i]):
+#             data["store_branch_name"][i] = ""
+#     except :
+#         data["store_branch_name"][i] = str(data["store_branch_name"][i])
+#
+#     if eq(data["store_branch_name"][i], ""):
+#         searchList.append(re.sub(" +", " ", data["store_nm"][i] + " " + str(data["addr"][i])))
+#     else:
+#         searchList.append(re.sub(" +", " ", data["store_nm"][i] + " " + str(data["store_branch_name"][i]) + " " + str(data_mango["addr"][i])))
+
 
 # Naver OpenAPI
 # 검색키워드 & URL
@@ -62,11 +87,11 @@ for i in range(0, len(data["store_nm"])):
 start_time = datetime.datetime.now()  # 시작시간
 done_time = ""
 cnt = 0
-for i in range(15923, len(searchList)):
+for i in range(12903, len(searchList)):
     query = searchList[i]
 
     encText = urllib.parse.quote(query)  # 검색어 인코딩
-    url = "https://openapi.naver.com/v1/search/local.json?query=" + encText + "&display=1&sort=random"  # json 결과 / 유사도 가장 높은 거 1개만
+    url = "https://openapi.naver.com/v1/search/local.json?query=" + encText + "&display=10&sort=random"  # json 결과 / 유사도 가장 높은 거 1개만
     # url = "https://openapi.naver.com/v1/search/blog.xml?query=" + encText # xml 결과
 
     requestCnt = 0
@@ -104,17 +129,17 @@ for i in range(15923, len(searchList)):
 
     DF = pd.DataFrame.from_dict(result_dict, orient='index').T
     if i == 0:
-        resultDF = DF[
-            ["title", "category", "telephone", "address", "roadAddress", "mapx", "mapy", "description", "link"]]
+        resultDF = DF[["title", "category", "telephone", "address", "roadAddress", "mapx", "mapy", "description", "link"]]
     else:
         DF = DF[["title", "category", "telephone", "address", "roadAddress", "mapx", "mapy", "description", "link"]]
         resultDF = pd.concat((resultDF, DF), axis=0, ignore_index=True)
 
-    time.sleep(3)
+    time.sleep(5)
 
     if i % 10 == 0 and i != 0:
-        time.sleep(2)
-
+        time.sleep(5)
+# '21.01.08 : 18738
+#
 # 결과 생성
 for i in range(len(resultDF["title"])):
     if resultDF["title"][i] is not None:
@@ -130,9 +155,14 @@ if os.path.isdir("result/S020") is False:
     os.makedirs("result/S020")
 
 notNoneCnt = 0
+res["Correct"] = ""
 for i in range(len(resultDF["title"])):
     if resultDF["category"][i] is not None:
         notNoneCnt += 1
+    if res["address"][i] is not None and re.search(res["addr"][i], res["address"][i]) is not None:
+        res["Correct"][i] = 'O'
+    else :
+        res["Correct"][i] = 'X'
 
 cnt = 0
 for i in range(len(resultDF["title"])):
@@ -144,7 +174,7 @@ for i in range(len(resultDF["title"])):
 if datetime.datetime.now().month < 10:
     res.to_csv("result/S020/naverapi_result_%d0%d.csv" % ((datetime.datetime.now().year), (datetime.datetime.now().month)), index=False)
 else:
-    res.to_csv("result/S020/naverapi_result_%d%d.csv" % ((datetime.datetime.now().year), (datetime.datetime.now().month)), index=False)
+    res.to_csv("result/S020/naverapi_result_%d0%d.csv" % ((datetime.datetime.now().year), (datetime.datetime.now().month)), index=False)
 
 
 
