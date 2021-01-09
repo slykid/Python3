@@ -41,6 +41,8 @@ data["store_no"] = data["store_no"].astype(int)
 data["store_nm"] = data["store_nm"].astype(str)
 data["addr"] = data["addr"].astype(str)
 
+data = data.sort_values("store_no")
+
 # 검색 리스트 생성
 searchList = []
 for i in range(0, len(data["store_nm"])):
@@ -87,7 +89,7 @@ for i in range(0, len(data["store_nm"])):
 start_time = datetime.datetime.now()  # 시작시간
 done_time = ""
 cnt = 0
-for i in range(12903, len(searchList)):
+for i in range(18738, len(searchList)):
     query = searchList[i]
 
     encText = urllib.parse.quote(query)  # 검색어 인코딩
@@ -139,7 +141,7 @@ for i in range(12903, len(searchList)):
     if i % 10 == 0 and i != 0:
         time.sleep(5)
 # '21.01.08 : 18738
-#
+
 # 결과 생성
 for i in range(len(resultDF["title"])):
     if resultDF["title"][i] is not None:
@@ -172,9 +174,9 @@ for i in range(len(resultDF["title"])):
 
 # 결과 파일 생성
 if datetime.datetime.now().month < 10:
-    res.to_csv("result/S020/naverapi_result_%d0%d.csv" % ((datetime.datetime.now().year), (datetime.datetime.now().month)), index=False)
+    res.to_csv("result/S020/naverapi_result_%d0%d_1.csv" % ((datetime.datetime.now().year), (datetime.datetime.now().month)), index=False)
 else:
-    res.to_csv("result/S020/naverapi_result_%d0%d.csv" % ((datetime.datetime.now().year), (datetime.datetime.now().month)), index=False)
+    res.to_csv("result/S020/naverapi_result_%d0%d_1.csv" % ((datetime.datetime.now().year), (datetime.datetime.now().month)), index=False)
 
 
 
