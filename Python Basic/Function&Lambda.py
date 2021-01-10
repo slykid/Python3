@@ -13,9 +13,15 @@
 # 함수 사용 시 선언하는 위치가 중요함
 # - 반드시 선언을 먼저 해주고 그 다음 실행해줘야함
 
+# 4) docstring
+# - 함수에 대한 설명을 표현함
+
 # ex1
 def hello(world):
+    """hello + 문자열 형태로 출력해주는 함수"""
     print("Hello", world)
+
+print(hello.__doc__)
 
 hello("Python")
 hello("777")
@@ -171,3 +177,58 @@ func_final(10, 10, lambda_mul_10)
 
 print(func_final(10, 10, lambda x : x * 1000)) # 한 번만 실행할 것이라면, 그냥 람다식으로 표현하는 것이 메모리 절약 상 좋음
 # 출력 시 None 이 나오는 이유: print함수에서 더이상 출력할 것이 없어서 None 이 출력됨
+
+# 3. Generator
+def count_down(count):
+    print("카운트다운 %5d부터 시작" % count)
+    while count > 0:
+        if count == 3:
+            print('count =' + str(count))
+        yield count
+        count -= 1
+    print("카운트다운 종료")
+
+cnt = count_down(5)
+print(cnt.__next__())
+print(cnt.__next__())
+print(cnt.__next__())
+print(cnt.__next__())
+print(cnt.__next__())
+print(cnt.__next__()) # StopIteration
+
+cnt = count_down(5)
+for i in cnt:
+    print(i)
+
+# 4. Decorator
+def document_it(func):
+    '''사용하는 func 함수 이름을 추가해 선언문이 포함된 새로운 함수를 생성한다.'''
+    def new_function(*args, **kwargs):
+        print("Running Function: ", func.__name__)
+        print("Positional Argument: ", args)
+        print("Keyword Argument: ", kwargs)
+
+        result = func(*args, **kwargs)
+        print("Result: ", result)
+        return result
+    return new_function
+
+## 데커레이터 사용법
+## 사용 예시 함수
+def add_int(a, b):
+    return a + b
+
+## 대상 함수
+add_int(3, 5)
+
+## 데커레이터를 직접 할당하는 방법
+new_add_int = document_it(add_int)
+new_add_int(3, 5)
+
+## 실제 사용방법
+@document_it
+def add_int_docer(a, b):
+    return a + b
+
+add_int_docer(3, 5)
+
