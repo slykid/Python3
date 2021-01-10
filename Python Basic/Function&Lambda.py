@@ -88,54 +88,6 @@ example_mul(10, 20, 'park', 'kim')
 example_mul(10, 20, 'park', 'kim', age1 = 25, age2=30)
 
 # 중첩함수(closure)
-def nested_func(num):
-    def func_in_func(num):
-        print(num)
-
-    print("in func")
-    func_in_func(num+1000)
-
-nested_func(100)
-
-# 힌트 사용하기
-def func_mul_list(x : int) -> list:
-    y1 = x * 100
-    y2 = x * 200
-    y3 = x * 300
-
-    return [y1, y2, y3]
-
-# 2. Lamda 식 정의
-# 1) Lambda
-# - 메모리 절약 , 가독성 향상 코드 간결
-# - 함수는 객체 생성 -> 리소스(메모리) 할당
-# - 람다는 즉시실행(Heap 초기화) -> 메모리 초기화
-
-# - 과용할 경우 가독성이 저하됨
-
-
-def mul_10(num : int) -> int:
-    return num * 10
-
-# 일반 함수 사용법
-var_func = mul_10
-print(var_func)  # 함수에 대해 직접적으로 값을 넣어 사용하지 않았지만, 객체는 생성됨
-#  출력결과 : <function mul_10 at 0x0000022144EDAD30>  <- 객체 생성의 증거
-print(type(var_func))  # <class 'function'>
-print(var_func(10))
-
-# Lamda 식 사용
-lambda_mul_10 = lambda num: num * 10
-print(lambda_mul_10(10))
-
-def func_final(x, y, func):
-    print(x * y * func(10))
-    
-func_final(10, 10, lambda_mul_10)
-
-print(func_final(10, 10, lambda x : x * 1000))  # 출력 시 None 이 나오는 이유: 더이상 출력할 것이 없어서 None 이 출력됨 
- 
-# 3. 내장함수
 # 함수 내에 또다른 함수를 정의하는 것으로 루프나 코드 중복을 피하기 위해
 # 또 다른 함수 내에서 복잡한 작업을 한 번 이상 수행하고자 할 때 사용함
 def outer(a, b):
@@ -144,6 +96,15 @@ def outer(a, b):
     return inner(a, b)
 
 print(outer(4, 7))
+
+def nested_func(num):
+    def func_in_func(num):
+        print(num)
+
+    print("in func")
+    func_in_func(num+1000)
+
+nested_func(100)
 
 ## nonlocal
 def outFunc(x):
@@ -165,7 +126,7 @@ def count(x):
 
 count(5)
 
-# closure
+# Closure
 def knight(saying):
     def inner():
         return f'We are the knights who say: {saying}'
@@ -174,3 +135,39 @@ def knight(saying):
 duck = knight('Duck')
 print(duck)
 print(duck())
+
+# 힌트 사용하기
+def func_mul_list(x : int) -> list:
+    y1 = x * 100
+    y2 = x * 200
+    y3 = x * 300
+
+    return [y1, y2, y3]
+
+# 2. Lamda 식 정의
+# 1) Lambda
+# - 메모리 절약 , 가독성 향상 코드 간결
+# - 함수는 객체 생성 -> 리소스(메모리) 할당
+# - 람다는 즉시실행(Heap 초기화) -> 메모리 초기화
+# - 과용할 경우 가독성이 저하됨
+def mul_10(num : int) -> int:
+    return num * 10
+
+# 일반 함수 사용법
+var_func = mul_10
+print(var_func)  # 함수에 대해 직접적으로 값을 넣어 사용하지 않았지만, 객체는 생성됨
+#  출력결과 : <function mul_10 at 0x0000022144EDAD30>  <- 객체 생성의 증거
+print(type(var_func))  # <class 'function'>
+print(var_func(10))
+
+# Lamda 식 사용
+lambda_mul_10 = lambda num: num * 10
+print(lambda_mul_10(10))
+
+def func_final(x, y, func):
+    print(x * y * func(10))
+    
+func_final(10, 10, lambda_mul_10)
+
+print(func_final(10, 10, lambda x : x * 1000)) # 한 번만 실행할 것이라면, 그냥 람다식으로 표현하는 것이 메모리 절약 상 좋음
+# 출력 시 None 이 나오는 이유: print함수에서 더이상 출력할 것이 없어서 None 이 출력됨
