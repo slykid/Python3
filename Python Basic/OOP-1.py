@@ -10,11 +10,11 @@
 # - 메소드: 클래스 내의 동작 함수
 
 class UserInfo:
-    def __init__(self, name, height, weight, address):
+    def __init__(self, name): #, height, weight, address):
         self.name= name
-        self.height = height
-        self.weight = weight
-        self.address = address
+        # self.height = height
+        # self.weight = weight
+        # self.address = address
 
     def user_info_print(self):
         print("Name: ", self.name)
@@ -26,7 +26,18 @@ user2 = UserInfo("park")
 user1.user_info_print()
 user2.user_info_print()
 
-# 클래스와 인스턴스의 차이
+print(id(user1))
+print(id(user2))
+
+print(user1.__dict__)
+print(user2.__dict__)
+
+# 차이는?
+# func1() 의 경우 자신을 호출하는 self 매개변수가 없기 때문에 객체화 했을 때는 호출이 불가하지만,
+# 클래스의 입장에서는 자신의 클래스에 소속된 메소드 이므로 호출이 가능함
+# 이를 클래스 메소드라고 부름름
+
+#클래스와 인스턴스의 차이
 # - 클래스는 추상적인 개념 ( = 붕어빵틀)
 # - 인스턴스는 클래스를 이용해 실제 메모리에 로드된 객체 ( = 붕어빵)
 
@@ -93,7 +104,7 @@ print(user1.stock_num)  # 클래스 내에 있는 변수이기 때문에, 객체
 print(user2.stock_num)
 print(user3.stock_num)
 
+print(user1.stock_num)
 del user1  # 객체 삭제
-
 print(user2.stock_num)
 print(user3.stock_num)

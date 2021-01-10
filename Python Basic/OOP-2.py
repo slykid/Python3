@@ -80,3 +80,64 @@ class M(B, A, z):
     pass
 
 print(M.mro())  # 너무나 많은 다중 상속은 코드 가독성이 떨어짐!
+print(A.mro())
+
+# Getter/Setter
+class Duck():
+    def __init__(self, input_name):
+        self.hidden_name = input_name
+
+    def get_name(self):
+        print('inside the getter')
+        return self.hidden_name
+
+    def set_name(self, input_name):
+        print('inside the setter')
+        self.hidden_name = input_name
+
+    name = property(get_name, set_name) # name 속성의 property로 정의
+
+# Decorator 구현
+class Duck_deco():
+    def __init__(self, input_name):
+        self.hidden_name = input_name
+
+    @property
+    def name(self):
+        print('inside the getter')
+        return self.hidden_name
+
+    @name.setter
+    def name(self, input_name):
+        print('inside the setter')
+        self.hidden_name = input_name
+
+class Duck_private():
+    def __init__(self, input_name):
+        self.__name = input_name
+
+    @property
+    def name(self):
+        print('inside the getter')
+        return self.__name
+
+    @name.setter
+    def name(self, input_name):
+        print('inside the setter')
+        self.__name = input_name
+
+
+
+fowl = Duck('Howard')
+fowl.get_name()
+fowl.name
+fowl.name = 'Daffy'
+fowl.name
+
+
+fowl = Duck_private('Howard')
+fowl.name
+fowl.name = 'Donald'
+fowl.name
+
+fowl.__name # 에러: AttributeError: 'Duck_private' object has no attribute '__name'
