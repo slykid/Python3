@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 import tensorflow as tf
 
+# 1. 단일 분류
 ## 데이터 로드
 red = pd.read_csv("http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv", sep=";")
 white = pd.read_csv("http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv", sep=";")
@@ -101,3 +102,60 @@ print(result)
 ### 위의 과정을 한번에 수행하는 경우
 y_pred_final = np.argmax(model.predict(x_test), axis=1)
 print(y_pred_final)
+
+# 2. 다중 분류
+wine = pd.concat([red, white])
+print(wine.describe())
+print(wine["quality"].value_counts())
+
+wine.loc[wine['quality'] <= 5, 'new_quality'] = 0
+wine.loc[wine['quality'] == 6, 'new_quality'] = 1
+wine.loc[wine['quality'] >= 7, 'new_quality'] = 2
+print(wine.describe())
+print(wine["new_quality"].value_counts())
+
+del wine['quality']
+
+wine_norm = (wine - wine.min()) / (wine.max() - wine.min())
+wine_shuffle = wine_norm.sample(frac=1)
+wine_array = wine_shuffle.to_numpy()
+
+train_idx = int(len(wine_array) * 0.8)
+x_train, y_train = wine_array[:train_idx, :-1], wine_array[:train_idx, -1]
+x_test, y_test = wine_array[train_idx:, :-1], wine_array[train_idx:, -1]
+
+y_train = tf.keras.utils.to_categorical(y_train, num_classes=3)
+y_test = tf.keras.utils.to_categorical(y_test, num_classes=3)
+
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(units=48, activation='relu', input_shape=(12,)),
+    tf.keras.layers.Dense(units=24, activation='relu'),
+    tf.keras.layers.Dense(units=12, activation='relu'),
+    tf.keras.layers.Dense(units=3, activation='softmax')
+])
+model.compile(
+    optimizer=tf.keras.optimizers.Adam(lr=0.07),
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+history = model.fit(x_train, y_train, epochs=25, batch_size=32, validation_split=0.25)
+
+## 성능 확인
+plt.figure(figsize=(12, 4))
+plt.subplot(1, 2, 1)
+plt.plot(history.history['loss'], 'b-', label='loss')
+plt.plot(history.history['val_loss'], 'r--', label='val_loss')
+plt.xlabel('Epochs')
+plt.legend()
+
+plt.subplot(1, 2, 2)
+plt.plot(history.history['accuracy'], 'g-', label='accuracy')
+plt.plot(history.history['val_accuracy'], 'k--', label='val_acc')
+plt.xlabel('Epochs')
+plt.ylim(0.5, 1)
+plt.legend()
+
+plt.show()
+
+model.evaluate(x_test, y_test)
