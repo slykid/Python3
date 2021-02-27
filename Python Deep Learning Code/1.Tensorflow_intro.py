@@ -95,3 +95,14 @@ model.add(keras.layers.Dense(CLASSES, input_shape=(RESHAPE,),
           kernel_initializer='zeros', name='dense_layer', activation='softmax'))
 print(model.summary())
 
+# tensorflow-datasets
+import tensorflow as tf
+import tensorflow_datasets as tfds
+
+builders = tfds.list_builders()
+print(builders)
+
+data, info = tfds.load("mnist", with_info=True)
+train_data, test_data = data['train'], data['test']
+
+print(info)
