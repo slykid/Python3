@@ -8,6 +8,8 @@
 # [입력]
 # "A man, a plan, a canal: Panama" -> True
 # "race a car -> False
+
+# [나의 답]
 def solution(input: str):
     _input = input.upper()
     _input = _input.replace(",", "").replace(":", "").replace(" ", "")
@@ -20,3 +22,45 @@ def solution(input: str):
 
 print(solution("A man, a plan, a canal: Panama"))
 print(solution("race a car"))
+
+# [풀이1 - 리스트 변환]
+s = "A man, a plan, a canal: Panama"
+def solution(s):
+    strs = []
+    for char in s:
+        if char.isalnum():
+            strs.append(char.lower())
+
+    # 펠린드롬 여부 판별
+    while len(strs) > 1:
+        if strs.pop(0) != strs.pop():
+            return False
+    return True
+print(solution(s))
+
+# [풀이 2 - 덱을 활용한 최적화]
+def solution(s: str):
+    import collections
+    strs: Deque = collections.deque()
+
+    for char in s:
+        if char.isalnum():
+            strs.append(char.lower())
+
+
+    while len(strs) > 1:
+        if strs.popleft() != strs.pop():
+            return False
+
+    return True
+
+print(solution(s))
+
+# [풀이 3 - 슬라이싱 사용]
+def solution(s):
+    import re
+
+    s = s.lower()
+    s = re.sub('[^a-z0-9]', '', s)
+
+    return s == s[::-1]
