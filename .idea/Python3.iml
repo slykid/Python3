@@ -7,7 +7,6 @@
       <sourceFolder url="file://$MODULE_DIR$/Python Deep Learning Code" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Python Machine Learning Code" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Field Test Code" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/S020" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CodingTest_Example" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Kaggle" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
@@ -16,7 +15,7 @@
       <excludeFolder url="file://$MODULE_DIR$/driver" />
       <excludeFolder url="file://$MODULE_DIR$/result" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.8 (venv)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python3" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TestRunnerService">
