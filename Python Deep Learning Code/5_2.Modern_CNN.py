@@ -108,3 +108,43 @@ model = K.applications.VGG16(
 )
 
 print(model.summary())
+
+## GoogLeNet
+## 참고자료
+# - https://ichi.pro/ko/tensorflowleul-sayonghan-googlenet-inceptionv1-174269272563335
+# - https://poddeeplearning.readthedocs.io/ko/latest/CNN/GoogLeNet/
+import tensorflow as tf
+from tensorflow import keras as K
+
+# inception module
+def inception(x, f_1x1, f_reduce_3x3, f_3x3, f_reduce_5x5, f_5x5, f_pool):
+    # 1x1
+    path1 = K.layers.Conv2D(f_1x1, strides=1, padding="same", activation="relu")(x)
+
+    # 3x3_reduce -> 3x3
+    path2 = K.layers.Conv2D(f_reduce_3x3, strides=1, padding="same", activation="relu")(x)
+    path2 = K.layers.Conv2D(f_3x3, strides=1, padding="same", activation="relu")(path2)
+
+    # 5x5_reduce -> 5x5
+    path3 = K.layers.Conv2D(f_reduce_5x5, strides=1, padding="same", acitivation="relu")(x)
+    path3 = K.layers.Conv2D(f_5x5, strides=1, padding="same", activation="relu")(path3)
+
+    # 3x3_max_pool -> 1x1
+    path4 = K.layers.MaxPooling2D(pool_size=(3,3), strides=1, padding="same")(x)
+    path4 = K.layers.Conv2D(f_pool, strides=1, padding="same", activation="relu")(path4)
+
+    return tf.concat([path1, path2, path3, path4], axis=3)
+
+# GoogLeNet
+input_layer = K.layers.Input(shape=(32, 32, 3))
+input = K.layers.experimental.preprocessing.Resizing(224, 224, interpolation="bilinear", input_shape=x_train.shape[1:])(input_layer)
+x = K.layers.Conv2D(64, 7, strides=2, padding="same", activation="relu")(input)
+x = K.layers.MaxPooling2D(pool_size=3, strides=2)(x)
+x = K.layers.Conv2D(64, 1, strides=1, padding="same", activation="relu")(x)
+x = K.layers.MaxPooling2D(pool_size=3, strides=2)(x)
+
+## inception 3a
+x = inception(x, f_1x1=64, f_reduce_3x3=96, f_3x3=128, f_reduce_5x5=16, f_5x5=32, f_pool=32)
+
+## inception 3b
+x = inception(x, f_1x1=128, f_reduce_3x3=128, f_3x3=192, f_reduce_5x5=32, f_5x5=32, f_pool=32)
