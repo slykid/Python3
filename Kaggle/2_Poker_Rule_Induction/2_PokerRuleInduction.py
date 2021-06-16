@@ -29,8 +29,8 @@ train1 = pd.concat([
     pd.get_dummies(train.S4),
     pd.get_dummies(train.S5)], axis=1)
 
-train1 = pd.concat([train, train1],axis=1)
-train1 = train1.drop(['S1','S2','S3','S4','S5'],axis=1)
+train1 = pd.concat([train, train1], axis=1)
+train1 = train1.drop(['S1','S2','S3','S4','S5'], axis=1)
 train1.info()
 
 test1 = pd.concat([
@@ -41,7 +41,7 @@ test1 = pd.concat([
     pd.get_dummies(test.S5)], axis=1)
 
 test1 = pd.concat([test, test1],axis=1)
-test1 = test1.drop(['S1','S2','S3','S4','S5'],axis=1)
+test1 = test1.drop(['S1','S2','S3','S4','S5'], axis=1)
 test1.info()
 
 # 3. Modeling #1. kNN
