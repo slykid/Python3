@@ -112,10 +112,33 @@ fin.close()
 with open('relativity', 'wt') as fout:
     fout.write(poem)
 
+# 4. 파일 내 위치 찾기
+fin = open('bfile', 'rb')
+fin.tell()
+fin.seek(255)
 
+bdata = fin.read()
+len(bdata)
+bdata[0]
 
+# 2. 구조체 파일
+# 1) csv
+import csv
 
+villains = [
+    ['Doctor', 'No'],
+    ['Rosa', 'Klebb'],
+    ['Mister', 'Big'],
+    ['Auric', 'Goldfinger'],
+    ['Ernst', 'Blofeld'],
+]
 
+with open('villains', 'wt') as fout:
+    csvout = csv.writer(fout)
+    csvout.writerows(villains)
 
+with open('villains', 'rt') as fin:
+    cin = csv.reader(fin)
+    villains = [row for row in cin]
 
-
+print(villains)
