@@ -62,3 +62,50 @@ plt.plot(x, y, 'bo')
 plt.xlabel('Population Growth Rate (%)')
 plt.ylabel('Eldery Population Rate (%)')
 
+# 실습 : 보스턴 주택 가격 예측하기
+import tensorflow as tf
+import pandas as pd
+import tensorflow.feature_column as fc
+from tensorflow.keras.datasets import boston_housing
+
+# 데이터 로드
+(x_train, y_train), (x_test, y_test) = boston_housing.load_data()
+
+# Pandas 데이터 프레임으로 변환
+features = ['CRIM', 'ZN', 'INDUS', 'CHAS', 'NOX', 'RM', 'AGE', 'DIS', 'RAD', 'TAX', 'PTRATIO', 'B', 'LSTAT']
+x_train_df = pd.DataFrame(x_train, columns=features)
+x_test_df = pd.DataFrame(x_test, columns=features)
+y_train_df = pd.DataFrame(y_train, columns=["MEDV"])
+y_test_df = pd.DataFrame(y_test, columns=["MEDV"])
+
+# 추정기를 위한 입력함수 생성
+def estimator_input(df_data, df_label, epochs=10, shuffle=True, batch_size=32):
+    def input_function():
+        dataset = tf.data.Dataset.from_tensor_slices((dict(df_data), df_label))
+        if shuffle:
+            dataset.shuffle(100)
+
+        dataset = dataset.batch(batch_size).repeat(epochs)
+
+        return dataset
+
+    return input_function
+
+# 특징 열 추출 & 파이프라인 생성
+feature_columns = []
+for feature in features:
+    feature_columns.append(fc.numeric_column(feature, dtype=tf.float32))
+
+train_input = estimator_input(x_train_df, y_train_df)
+valid_input = estimator_input(x_test_df, y_test_df, epochs=1, shuffle=False)
+
+# LinearRegressor 추정기 생성
+linear_est = tf.estimator.LinearRegressor(feature_columns=feature_columns)
+linear_est.train(train_input)
+result = linear_est.evaluate(valid_input)
+
+# 예측하기
+y_pred = linear_est.predict(valid_input)
+
+for pred, exp in zip(y_pred, y_test[:32]):
+    print("Predicted value: ", pred['predictions'][0], " Expected: ", exp)

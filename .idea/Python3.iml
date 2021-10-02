@@ -8,7 +8,14 @@
       <sourceFolder url="file://$MODULE_DIR$/Python Machine Learning Code" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Field Test Code" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/S020" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/CodingTest_Example" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Kaggle" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Kaggle/1_Titanic_disaster" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Kaggle/2_Poker_Rule_Induction" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/data" />
+      <excludeFolder url="file://$MODULE_DIR$/driver" />
+      <excludeFolder url="file://$MODULE_DIR$/result" />
     </content>
     <orderEntry type="jdk" jdkName="Python3" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
