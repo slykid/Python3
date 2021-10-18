@@ -142,3 +142,113 @@ with open('villains', 'rt') as fin:
     villains = [row for row in cin]
 
 print(villains)
+
+with open('villains', 'rt') as fin:
+    cin = csv.DictReader(fin, fieldnames=["first", "last"])
+    villains = [row for row in cin]
+
+print(villains)
+
+with open('villains', 'wt') as fout:
+    cout = csv.DictWriter(fout, ["first", "last"])
+    cout.writeheader()
+    cout.writerows(villains)
+
+# 2) JSON
+import json
+
+menu = {
+    "breakfast": {
+        "hours": "7-11",
+        "items": {
+            "breakfast burritos": "$6.00",
+            "pancakes": "$4.00"
+        }
+    },
+    "lunch": {
+        "hours": "11-3",
+        "items": {
+            "hamburger": "$15.00"
+        }
+    },
+
+    "dinner": {
+        "hours": "3-10",
+        "items": {
+            "spaghetti": "$8.00"
+        }
+    }
+}
+
+menu_json = json.dumps(menu)
+menu_json
+
+menu2 = json.loads(menu_json)
+
+## datetime 형식 변환
+## 1) 문자열로 변환
+import datetime
+
+now = datetime.datetime.now()
+print(now)
+
+json.dumps(now) # TypeError: Object of type datetime is not JSON serializable
+
+now_str = str(now)
+json.dumps(now_str)
+
+## 2) epoch 타입으로 변환
+from time import mktime
+
+now_epoch = int(mktime(now.timetuple()))
+json.dumps(now_epoch)
+
+class DTEncoder(json.JSONEncoder):
+    def default(self, obj):
+
+        # 오브젝트 타입 확인
+        if isinstance(obj, datetime.datetime):
+
+            # datetime 타입일 경우, epoch 타입으로 변환
+            return int(mktime(obj.timetuple()))
+
+        # datetime 타입이 아닐 경우, 기본 JSON 문자열을 반환
+        return json.JSONEncoder.default(self, obj)
+
+json.dumps(now, cls=DTEncoder)
+
+# 3) pickle
+import pickle
+import datetime
+
+now = datetime.datetime.utcnow()
+now_pickle = pickle.dumps(now)
+now_prime = pickle.loads(now_pickle)
+
+print(now)
+print(now_prime)
+
+class Tiny():
+    def __str__(self):
+        return 'tiny'
+
+obj1 = Tiny()
+obj1
+
+str(obj1)
+
+obj1_pickle = pickle.dumps(obj1)
+obj1_pickle
+
+obj2 = pickle.loads(obj1_pickle)
+obj2
+
+str(obj2)
+
+# 4. 데이터베이스
+import psycopg2
+
+conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="Gallerhead106)", port="5432")
+cursor = conn.cursor()
+cursor.execute("select * from test_db;")
+print(cursor.fetchall())
