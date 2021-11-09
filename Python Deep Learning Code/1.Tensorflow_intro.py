@@ -11,6 +11,7 @@ from tensorflow.python.client import device_lib
 device_lib.list_local_devices()  # 현재 검색되는 GPU 는 1개(0번) 만 검색됨
 
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # 에러로그 제거를 위한 옵션
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # 0 번에 해당하는 GPU 모듈만 사용하게 됨
 
 # 1. Tensorflow Basic
@@ -86,6 +87,7 @@ for i in range(1000):
 ## 3) keras
 import tensorflow as tf
 from tensorflow import keras
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 CLASSES = 10
 RESHAPE = 784
