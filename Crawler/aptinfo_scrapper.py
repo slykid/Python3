@@ -26,7 +26,7 @@ while True:
     as2_err_cnt = 0
     for row in range(0, row_num):
         content[row + content_count] = {}
-        content[row + content_count]["sido_nm"] = xml_content.find_all("as1")[row].text
+        content[row + content_count]["mega_nm"] = xml_content.find_all("as1")[row].text
 
         # 세종특별자치시 인 경우 시군구명이 없음
         if xml_content.find_all("as1")[row].text.__eq__('세종특별자치시'):
@@ -44,7 +44,8 @@ while True:
     total_cnt = int(xml_content.find("totalCount").text)  # 전체 개수
     total_page = total_cnt // 100 + 1  # 페이지 수
 
-    if total_page == page_no :
+    # if total_page == page_no :
+    if page_no == 10:
         break
     else:
         page_no += 1
@@ -52,5 +53,4 @@ while True:
     time.sleep(5)
 
 df_content = pd.DataFrame(content).T
-df_content.to_csv("data/apt_info/apt_info_test.csv", index=False, encoding="euc-kr")
-# df_content = df_content.drop_duplicates()
+df_content.to_csv("data/apt_info/apt_info_list.csv", index=False, encoding="UTF-8")
