@@ -44,8 +44,8 @@ while True:
     total_cnt = int(xml_content.find("totalCount").text)  # 전체 개수
     total_page = total_cnt // 100 + 1  # 페이지 수
 
-    # if total_page == page_no :
-    if page_no == 10:
+    if total_page == page_no :
+    # if page_no == :
         break
     else:
         page_no += 1
