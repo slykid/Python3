@@ -1,10 +1,15 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier,GradientBoostingClassifier,ExtraTreesClassifier
 from sklearn.neighbors import KNeighborsClassifier
+# from sklearn.cross_validation import KFold
 from sklearn.model_selection import StratifiedKFold
 from sklearn.linear_model import LassoCV
 
+# df_train = pd.read_csv('train.csv')
+# df_test = pd.read_csv('test.csv')
 df_train = pd.read_csv('data/poker_rule_induction/train.csv')
 df_test = pd.read_csv('data/poker_rule_induction/test.csv')
 
@@ -25,6 +30,11 @@ ytrain = df_train['hand']
 id = df_test['id']
 xtest = df_test1
 
+# model = RandomForestClassifier(n_estimators=10)
+# model.fit(xtrain,ytrain)
+# y_pred = model.predict(xtest)
+
+# cv = KFold(len(df_train.index), n_folds=5, shuffle=True)
 cv = StratifiedKFold(n_splits=5)
 
 regs = [GradientBoostingClassifier(n_estimators=10),
@@ -41,6 +51,10 @@ regs = [GradientBoostingClassifier(n_estimators=10),
 meta_feature = pd.DataFrame(np.zeros(xtrain.shape[0]))
 
 for train_index, test_index in cv.split(xtrain, ytrain):
+    # xtrain_train = xtrain.ix[train_index]
+    # xtrain_test = xtrain.ix[test_index]
+    # ytrain_train = ytrain.ix[train_index]
+    # ytrain_test = ytrain.ix[test_index]
     xtrain_train = xtrain.loc[train_index]
     xtrain_test = xtrain.loc[test_index]
     ytrain_train = ytrain.loc[train_index]
@@ -50,6 +64,7 @@ for train_index, test_index in cv.split(xtrain, ytrain):
     for reg in regs:
         reg_name = str(reg_num) + str(reg.__class__).split('.')[-1].split("'")[0]
         reg.fit(xtrain_train, ytrain_train)
+        # meta_feature.ix[test_index, reg_name] = reg.predict(xtrain_test)
         meta_feature.loc[test_index, reg_name] = reg.predict(xtrain_test)
         reg_num += 1
 meta_feature = meta_feature.drop(0,axis=1)
