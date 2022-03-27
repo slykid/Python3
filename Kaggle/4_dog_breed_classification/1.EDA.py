@@ -36,10 +36,13 @@ features = np.zeros((len(classes), 224, 224, 3), dtype="float32")
 labels = keras.utils.to_categorical(classes, len(species["index"]))
 
 for i in range(len(classes)):
-    img = keras.preprocessing.image.load_image(label["path"][i], target_size=(224, 224))
+    img = keras.preprocessing.image.load_image(label["path"][i], target_size=(224, 224))  # TODO: 내용 수정
     img = keras.preprocessing.image.image_to_array(img)
     x = np.expand_dims(img.copy(), axis=0)
     features[i] = x / 255.0
 
 
 x_train, x_val, y_train, y_val = train_test_split(features, labels, test_size=0.2, stratify=True)
+
+# 모델링
+model = keras.model.
