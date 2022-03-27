@@ -13,6 +13,8 @@
       <sourceFolder url="file://$MODULE_DIR$/Kaggle/1_Titanic_disaster" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Kaggle/2_Poker_Rule_Induction" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Crawler" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Kaggle/3_NBME" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Kaggle/4_dog_breed_classification" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
       <excludeFolder url="file://$MODULE_DIR$/data" />
       <excludeFolder url="file://$MODULE_DIR$/driver" />
