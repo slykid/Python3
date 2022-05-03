@@ -5,6 +5,19 @@
 
 def solution(input):
 
-    result = 0
+    output = []
+    result = 1
     for i in range(len(input)):
-        
+        save = input[i]
+        input.pop(i)
+
+        for value in input:
+            result *= value
+
+        output.append(result)
+        result = 1
+        input.insert(i, save)
+
+    return output
+
+solution([1, 2, 3, 4])
