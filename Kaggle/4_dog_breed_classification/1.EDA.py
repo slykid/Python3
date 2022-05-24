@@ -45,4 +45,6 @@ for i in range(len(classes)):
 x_train, x_val, y_train, y_val = train_test_split(features, labels, test_size=0.2, stratify=True)
 
 # 모델링
-model = keras.model.
+model = keras.model.Sequential([
+
+])
