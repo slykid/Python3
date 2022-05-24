@@ -4,10 +4,14 @@
 import numpy as np
 import pandas as pd
 import cv2
+import tensorflow as tf
+
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
-import tensorflow as tf
+
 from tensorflow import keras
+from tensorflow.keras import layers
+
 
 label = pd.read_csv("data/dog-breed-identification/labels.csv")
 
@@ -36,15 +40,21 @@ features = np.zeros((len(classes), 224, 224, 3), dtype="float32")
 labels = keras.utils.to_categorical(classes, len(species["index"]))
 
 for i in range(len(classes)):
-    img = keras.preprocessing.image.load_image(label["path"][i], target_size=(224, 224))  # TODO: 내용 수정
-    img = keras.preprocessing.image.image_to_array(img)
+    img = keras.preprocessing.image.load_img(label["path"][i], target_size=(224, 224))  # TODO: 내용 수정
+    img = keras.preprocessing.image.img_to_array(img)
     x = np.expand_dims(img.copy(), axis=0)
     features[i] = x / 255.0
 
-
-x_train, x_val, y_train, y_val = train_test_split(features, labels, test_size=0.2, stratify=True)
+x_train, x_val, y_train, y_val = train_test_split(features, labels, test_size=0.3, stratify=labels)
 
 # 모델링
-model = keras.model.Sequential([
+input_layer = keras.Input(shape=(224, 224, 3))
+cnn1_1 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid', activation='relu')(input_layer)
+cnn1_2 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid', activation='relu')(cnn1_1)
+max_pool1 = layers.MaxPool2D(pool_size=(5, 5))(cnn1_2)
 
-])
+cnn2_1 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid', activation='relu')(max_pool1)
+cnn2_2 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid', activation='relu')(cnn2_1)
+max_pool2 = layers.MaxPool2D(pool_size=(2, 2))(cnn2_2)
+
+flatten = layers.Flatten()
