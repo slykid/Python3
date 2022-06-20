@@ -3,8 +3,10 @@ import pandas as pd
 import numpy as np
 
 # 데이터 로드
-train = pd.read_csv('./data/train.csv')
-test = pd.read_csv('./data/test.csv')
+# train = pd.read_csv('./data/train.csv')
+# test = pd.read_csv('./data/test.csv')
+train = pd.read_csv("data/ubicare_quiz1/train.csv")
+test = pd.read_csv("data/ubicare_quiz1/test.csv")
 
 train.head()
 test.head()
@@ -49,6 +51,7 @@ test["cp_prep"] = test["cp"].apply(cp_label)
 test["thal_prep"] = test["thal"].apply(thal_label)
 
 # 데이터 전처리: 수치형
+## Standard Scaling : 평균 = 0, 분산 = 1이 되도록 데이터를 스케일링하는 작업
 train["thalach_prep"] = (train["thalach"] - train["thalach"].mean()) / train["thalach"].std()
 train["oldpeak_prep"] = (train["oldpeak"] - train["oldpeak"].mean()) / train["oldpeak"].std()
 train["trestbps_prep"] = (train["trestbps"] - train["trestbps"].mean()) / train["trestbps"].std()
@@ -60,7 +63,6 @@ test["trestbps_prep"] = (test["trestbps"] - test["trestbps"].mean()) / test["tre
 test["chol_prep"] = (test["chol"] - test["chol"].mean()) / test["chol"].std()
 
 # 데이터 스플릿
-
 from sklearn.model_selection import train_test_split
 
 x = train[["sex_prep", "cp_prep", "thalach_prep", "exang", "oldpeak_prep", "slope", "ca", "thal_prep", "trestbps_prep", "chol_prep", "fbs", "restecg"]]
@@ -78,9 +80,14 @@ model = RandomForestClassifier(n_estimators=10, random_state=42)
 model.fit(x_train, y_train)
 y_pred = model.predict(x_valid)
 
+# 모델 평가
+## Confusion Matrix
 cm = confusion_matrix(y_true = y_valid, y_pred = y_pred)
 print(cm)
-print(classification_report(y_valid, y_pred, target_names=["disease_y", "disease_n"]))
+
+# classification_report(y_valid, y_pred, target_names=["class_0", "class_1"])
+# print(classification_report(y_valid, y_pred, target_names=["disease_y", "disease_n"]))  # TODO: 아래와 같이 수정
+print(classification_report(y_valid, y_pred, target_names=["disease_n", "disease_y"]))
 
 y_res = model.predict(test[["sex_prep", "cp_prep", "thalach_prep", "exang", "oldpeak_prep", "slope", "ca", "thal_prep", "trestbps_prep", "chol_prep", "fbs", "restecg"]])
 df = pd.concat([test["id"],pd.DataFrame(y_res, columns=["target"])], axis=1)
