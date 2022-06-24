@@ -57,4 +57,10 @@ cnn2_1 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid
 cnn2_2 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid', activation='relu')(cnn2_1)
 max_pool2 = layers.MaxPool2D(pool_size=(2, 2))(cnn2_2)
 
-flatten = layers.Flatten()
+flatten = layers.Flatten()(max_pool2)
+dense1 = layers.Dense(512, activation="relu")(flatten)
+dense2 = layers.Dense(256, activation="relu")(dense1)
+output = layers.Dense(2, activation="softmax")(dense2)
+
+model = keras.Model(input_layer, output, name="dog_bread_clf")
+model.summary()
