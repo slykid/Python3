@@ -2,9 +2,10 @@ import time
 import pandas as pd
 
 from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, precision_score
 
 # data load
 data = pd.read_csv("data/security/youtube_dataset.csv")
@@ -36,7 +37,7 @@ x_train_scaled = scaler.fit(x_train).fit_transform(x_train)
 scaler = StandardScaler()
 x_test_scaled = scaler.fit(x_test).fit_transform(x_test)
 
-# Model: SVC (SVM Classifier)
+# Model 1: SVC (SVM Classifier)
 model = SVC(gamma='auto', kernel='rbf', probability=True)
 
 ## train model
@@ -52,7 +53,10 @@ print(y_pred)
 print(f1_score(y_true=y_test, y_pred=y_pred))  # f1-score: 1.0  -> overfitting
 
 
+# Model 2: RandomForest
+model = RandomForestClassifier(n_estimators=200, criterion="entropy")
+model.fit(x_train, y_train)
+y_pred = model.predict(x_test)
 
-
-
-
+print(precision_score(y_test, y_pred))
+print(f1_score(y_test, y_pred))  # f1-score: 1.0  -> overfitting

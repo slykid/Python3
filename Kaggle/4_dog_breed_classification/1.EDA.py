@@ -1,16 +1,17 @@
 # 작성자: SLYKID (김 길 현)
 # kaggle site: https://www.kaggle.com/competitions/dog-breed-identification
-import os
+
 import numpy as np
 import pandas as pd
 import cv2
-from matplotlib import pyplot as plt
-import glob
-import PIL
-from PIL import Image
-
 import tensorflow as tf
+
+from sklearn.model_selection import train_test_split
+from matplotlib import pyplot as plt
+
 from tensorflow import keras
+from tensorflow.keras import layers
+
 
 label = pd.read_csv("data/dog-breed-identification/labels.csv")
 
@@ -26,25 +27,40 @@ species = pd.DataFrame(pd.unique(label["breed"]), columns=["species"]).reset_ind
 # 이미지 정제
 IMG_WIDTH = 250
 IMG_HEIGHT = 250
-BATCH_SIZE = 32
 images = []
 classes = []
 
-## 이미지 로드
+for i in range(len(label["id"])):
+    image = cv2.imread(label["path"][i])
+    images.append(cv2.resize(image, (IMG_WIDTH, IMG_HEIGHT)))
+    classes.append(species[species["species"]==label["breed"][i]].index[0])
 
+# 학습 데이터 생성
+features = np.zeros((len(classes), 224, 224, 3), dtype="float32")
+labels = keras.utils.to_categorical(classes, len(species["index"]))
 
+for i in range(len(classes)):
+    img = keras.preprocessing.image.load_img(label["path"][i], target_size=(224, 224))  # TODO: 내용 수정
+    img = keras.preprocessing.image.img_to_array(img)
+    x = np.expand_dims(img.copy(), axis=0)
+    features[i] = x / 255.0
 
+x_train, x_val, y_train, y_val = train_test_split(features, labels, test_size=0.3, stratify=labels)
 
 # 모델링
-input = keras.Input(shape=(224, 224, 3), batch_size=64, name="input_layer")
-conv1 = tf.keras.layers.Conv2D(filter=32, kernel_size=3, strides=3,  padding='same')(input)
-pool1 = tf.keras.layers.MaxPool2D()(conv1)
-norm1 = tf.keras.layers.BatchNormalization()(pool1)
+input_layer = keras.Input(shape=(224, 224, 3))
+cnn1_1 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid', activation='relu')(input_layer)
+cnn1_2 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid', activation='relu')(cnn1_1)
+max_pool1 = layers.MaxPool2D(pool_size=(5, 5))(cnn1_2)
 
-conv2 = tf.keras.layers.Conv2D(filter=32, kernel_size=3, strides=3, padding="same")(norm1)
-pool2 = tf.keras.layers.MaxPool2D()(conv2)
-norm2 = tf.keras.layers.BatchNormalization()(pool2)
+cnn2_1 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid', activation='relu')(max_pool1)
+cnn2_2 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid', activation='relu')(cnn2_1)
+max_pool2 = layers.MaxPool2D(pool_size=(2, 2))(cnn2_2)
 
-flatten = tf.keras.layers.Flatten()(norm2)
-dense1 = tf.keras.layers.Dense(256)(flatten)
-model = tf.keras.
+flatten = layers.Flatten()(max_pool2)
+dense1 = layers.Dense(512, activation="relu")(flatten)
+dense2 = layers.Dense(256, activation="relu")(dense1)
+output = layers.Dense(2, activation="softmax")(dense2)
+
+model = keras.Model(input_layer, output, name="dog_bread_clf")
+model.summary()
