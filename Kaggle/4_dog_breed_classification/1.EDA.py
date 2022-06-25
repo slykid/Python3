@@ -12,7 +12,6 @@ from matplotlib import pyplot as plt
 from tensorflow import keras
 from tensorflow.keras import layers
 
-
 label = pd.read_csv("data/dog-breed-identification/labels.csv")
 
 # 이미지 경로 생성
@@ -47,6 +46,7 @@ for i in range(len(classes)):
 
 x_train, x_val, y_train, y_val = train_test_split(features, labels, test_size=0.3, stratify=labels)
 
+
 # 모델링
 input_layer = keras.Input(shape=(224, 224, 3))
 cnn1_1 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid', activation='relu')(input_layer)
@@ -60,15 +60,21 @@ max_pool2 = layers.MaxPool2D(pool_size=(2, 2))(cnn2_2)
 flatten = layers.Flatten()(max_pool2)
 dense1 = layers.Dense(512, activation="relu")(flatten)
 dense2 = layers.Dense(256, activation="relu")(dense1)
-output = layers.Dense(2, activation="softmax")(dense2)
+dense3 = layers.Dense(64, activation="relu")(dense2)
+output = layers.Dense(len(pd.unique(label["breed"])), activation="softmax")(dense3)
 
-model = keras.Model(input_layer, output, name="dog_bread_clf")
+model = tf.keras.Model(input_layer, output, name="dog_bread_clf")
 model.summary()
 
-model.complie(
-    loss=tf.keras.metrics.CategoricalCrossentropy,
-    optimizer=tf.keras.optimizers.Adam,
-    metrics=tf.keras.metrics.precision,
+model.compile(
+    optimizer=tf.keras.optimizers.Adam(),
+    loss="categorical_crossentropy",
+    metrics=tf.keras.metrics.Precision(),
 )
 
-model.fit(x_train, y_train)
+history = model.fit(
+    x_train, y_train,
+    epochs=50
+)
+
+model.evaluate(x_val, y_val)
