@@ -64,3 +64,11 @@ output = layers.Dense(2, activation="softmax")(dense2)
 
 model = keras.Model(input_layer, output, name="dog_bread_clf")
 model.summary()
+
+model.complie(
+    loss=tf.keras.metrics.CategoricalCrossentropy,
+    optimizer=tf.keras.optimizers.Adam,
+    metrics=tf.keras.metrics.precision,
+)
+
+model.fit(x_train, y_train)
