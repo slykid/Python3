@@ -1,80 +1,103 @@
 # 작성자: SLYKID (김 길 현)
 # kaggle site: https://www.kaggle.com/competitions/dog-breed-identification
 
+import os
 import numpy as np
 import pandas as pd
 import cv2
-import tensorflow as tf
 
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 
-from tensorflow import keras
-from tensorflow.keras import layers
+import tensorflow as tf
+from tensorflow.keras.layers import AveragePooling2D, Dense, Flatten, Dropout, Input
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.applications.xception import Xception
+from tensorflow.keras.optimizers import Adam, SGD
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 label = pd.read_csv("data/dog-breed-identification/labels.csv")
 
+IMG_WIDTH = 224
+IMG_HEIGHT = 224
+CHANNELS = 3
+BATCH_SIZE = 32
+
 # 이미지 경로 생성
 label.info()
-label["path"] = label["id"].map(lambda x: "data/dog-breed-identification/train/" + x + ".jpg")
-label = label[["id", "path", "breed"]]
+label["filename"] = label["id"].map(lambda x: x + ".jpg")
+label = label[["id", "breed", "filename"]]
 
-# 견종 확인 및 라벨링
-print(len(pd.unique(label["breed"])))  # 120 종
-species = pd.DataFrame(pd.unique(label["breed"]), columns=["species"]).reset_index()
-
-# 이미지 정제
-IMG_WIDTH = 250
-IMG_HEIGHT = 250
-images = []
-classes = []
-
-for i in range(len(label["id"])):
-    image = cv2.imread(label["path"][i])
-    images.append(cv2.resize(image, (IMG_WIDTH, IMG_HEIGHT)))
-    classes.append(species[species["species"]==label["breed"][i]].index[0])
+label['breed'].value_counts().plot.bar(figsize=(16, 8))
 
 # 학습 데이터 생성
-features = np.zeros((len(classes), 224, 224, 3), dtype="float32")
-labels = keras.utils.to_categorical(classes, len(species["index"]))
+data_generator = ImageDataGenerator(rescale=1./255., validation_split=0.2, rotation_range=20,
+                                    zoom_range=0.1, width_shift_range=0.2, height_shift_range=0.2,
+                                    shear_range=0.1, horizontal_flip=True, fill_mode="nearest"
+                                )
 
-for i in range(len(classes)):
-    img = keras.preprocessing.image.load_img(label["path"][i], target_size=(224, 224))  # TODO: 내용 수정
-    img = keras.preprocessing.image.img_to_array(img)
-    x = np.expand_dims(img.copy(), axis=0)
-    features[i] = x / 255.0
+train_generator = data_generator.flow_from_dataframe(
+                    label,
+                    # directory='../input/dog-breed-identification/train/',  # for KAGGLE Notebook
+                    directory='data/dog-breed-identification/train/',
+                    x_col='filename', y_col='breed',
+                    target_size=(IMG_WIDTH, IMG_HEIGHT), class_mode='categorical', batch_size=BATCH_SIZE,
+                    shuffle=True, seed=1234, subset='training'
+                )
+val_generator = data_generator.flow_from_dataframe(
+                    label,
+                    # directory='../input/dog-breed-identification/train/',  # for KAGGLE Notebook
+                    directory='data/dog-breed-identification/train/',
+                    x_col='filename', y_col='breed',
+                    target_size=(IMG_WIDTH, IMG_HEIGHT), class_mode='categorical', batch_size=BATCH_SIZE,
+                    shuffle=True, seed=1234, subset='validation'
+                )
 
-x_train, x_val, y_train, y_val = train_test_split(features, labels, test_size=0.3, stratify=labels)
+# 제너레이터 이미지 확인
+img, label = next(train_generator)
+fig = plt.figure(figsize=(15, 10))
 
+for i in range(12):
+    fig.add_subplot(3, 4, i+1)
+    plt.imshow(img[i])
+    plt.axis('off')
+
+# 테스트 데이터 전처리
+# test_images = os.listdir('../input/dog-breed-identification/test/') # for KAGGLE Notebook
+test_images = os.listdir('data/dog-breed-identification/test/')
+test_set = pd.DataFrame(test_images, columns=['filename'])
+test_set["id"] = test_set["filename"].apply(lambda x: x.split(".")[0])
+test_set = test_set[["id", "filename"]]
 
 # 모델링
-input_layer = keras.Input(shape=(224, 224, 3))
-cnn1_1 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid', activation='relu')(input_layer)
-cnn1_2 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid', activation='relu')(cnn1_1)
-max_pool1 = layers.MaxPool2D(pool_size=(5, 5))(cnn1_2)
+base_model = Xception(weights="imagenet", include_top=False, input_tensor=Input(shape=(IMG_HEIGHT, IMG_WIDTH, CHANNELS)))
 
-cnn2_1 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid', activation='relu')(max_pool1)
-cnn2_2 = layers.Conv2D(filters=64, kernel_size=(3, 3), strides=2, padding='valid', activation='relu')(cnn2_1)
-max_pool2 = layers.MaxPool2D(pool_size=(2, 2))(cnn2_2)
+# 기존 모델 계층은 "학습 안함" 설정
+for layer in base_model.layers:
+    layer.trainable = False
 
-flatten = layers.Flatten()(max_pool2)
-dense1 = layers.Dense(512, activation="relu")(flatten)
-dense2 = layers.Dense(256, activation="relu")(dense1)
-dense3 = layers.Dense(64, activation="relu")(dense2)
-output = layers.Dense(len(pd.unique(label["breed"])), activation="softmax")(dense3)
+avg_pool_tail = AveragePooling2D(pool_size=4)(base_model.output)
+flatten = Flatten()(avg_pool_tail)
+dense1_tail = Dense(1024, activation="relu")(flatten)
+dropout1_tail = Dropout(0.3)(dense1_tail)
+dense2_tail = Dense(512, activation="relu")(dropout1_tail)
+dropout2_tail = Dropout(0.3)(dense2_tail)
+result = Dense(120, activation="softmax")(dropout2_tail)
 
-model = tf.keras.Model(input_layer, output, name="dog_bread_clf")
-model.summary()
+model = tf.keras.Model(inputs=base_model.input, outputs=result)
 
-model.compile(
-    optimizer=tf.keras.optimizers.Adam(),
-    loss="categorical_crossentropy",
-    metrics=tf.keras.metrics.Precision(),
-)
+# Optimizer 설정
+optimizer = SGD(learning_rate=0.1, momentum=0.9, decay=0.01)
 
-history = model.fit(
-    x_train, y_train,
-    epochs=50
-)
+# Early Stopping 설정
+early_stopping = EarlyStopping(monitor='val_loss', mode='min', patience=10)
 
-model.evaluate(x_val, y_val)
+# Checkpoint 설정
+# checkpoint = ModelCheckpoint(filepath='./weights.hdf5', verbose=1, save_best_only=True)  # For KAGGLE Notebook
+checkpoint = ModelCheckpoint(filepath='data/dog-breed-identification/weight/weights.hdf5', verbose=1, save_best_only=True)  # For KAGGLE Notebook
+
+model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=['accuracy'])
+
+history1 = model.fit(train_generator, epochs=5, validation_data=val_generator, callbacks=[checkpoint])  # loss: 1.1821 - accuracy: 0.7032 - val_loss: 1.2266 - val_accuracy: 0.6996
+history2 = model.fit(train_generator, epochs=5, validation_data=val_generator, callbacks=[checkpoint])  # loss: 4.9315 - accuracy: 0.0076 - val_loss: 4.8423 - val_accuracy: 0.0127
+history3 = model.fit(train_generator, epochs=10, validation_data=val_generator, callbacks=[checkpoint])
