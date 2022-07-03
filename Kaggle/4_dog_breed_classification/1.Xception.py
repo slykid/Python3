@@ -69,6 +69,18 @@ test_set = pd.DataFrame(test_images, columns=['filename'])
 test_set["id"] = test_set["filename"].apply(lambda x: x.split(".")[0])
 test_set = test_set[["id", "filename"]]
 
+test_generator = ImageDataGenerator(rescale=1./255.)
+test_generator = test_generator.flow_from_dataframe(
+                    test_set,
+                    # directory='../input/dog-breed-identification/test/',  # for KAGGLE Notebook
+                    directory='data/dog-breed-identification/test/',
+                    x_col="filename",
+                    target_size=(IMG_WIDTH, IMG_HEIGHT),
+                    class_mode=None,
+                    batch_size=BATCH_SIZE,
+                    shuffle=False
+                )
+
 # 모델링
 base_model = Xception(weights="imagenet", include_top=False, input_tensor=Input(shape=(IMG_HEIGHT, IMG_WIDTH, CHANNELS)))
 
@@ -94,10 +106,14 @@ early_stopping = EarlyStopping(monitor='val_loss', mode='min', patience=10)
 
 # Checkpoint 설정
 # checkpoint = ModelCheckpoint(filepath='./weights.hdf5', verbose=1, save_best_only=True)  # For KAGGLE Notebook
-checkpoint = ModelCheckpoint(filepath='data/dog-breed-identification/weight/weights.hdf5', verbose=1, save_best_only=True)  # For KAGGLE Notebook
+checkpoint = ModelCheckpoint(filepath='data/dog-breed-identification/weight/weights_xception.hdf5', verbose=1, save_best_only=True)  # For KAGGLE Notebook
 
 model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=['accuracy'])
 
-history1 = model.fit(train_generator, epochs=5, validation_data=val_generator, callbacks=[checkpoint])  # loss: 1.1821 - accuracy: 0.7032 - val_loss: 1.2266 - val_accuracy: 0.6996
-history2 = model.fit(train_generator, epochs=5, validation_data=val_generator, callbacks=[checkpoint])  # loss: 4.9315 - accuracy: 0.0076 - val_loss: 4.8423 - val_accuracy: 0.0127
-history3 = model.fit(train_generator, epochs=10, validation_data=val_generator, callbacks=[checkpoint])
+history1 = model.fit(train_generator, epochs=5, validation_data=val_generator)  # loss: 1.1821 - accuracy: 0.7032 - val_loss: 1.2266 - val_accuracy: 0.6996
+
+model.load_weights("data/dog-breed-identification/weight/weights_xception.hdf5")
+y_pred = model.predict(test_generator)
+result = pd.concat([test_set["id"], pd.DataFrame(y_pred)], axis=1)
+result.columns=["id"] + list(train_generator.class_indices.keys())
+result.to_csv("result/dog-breed-identification/submission.csv", index=False)
