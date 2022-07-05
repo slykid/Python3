@@ -32,6 +32,7 @@ x_train, x_valid, y_train, y_valid = train_test_split(filenames, target_encode, 
 print(len(x_train), len(y_train), len(x_valid), len(y_valid))
 
 ## 5. 이미지 전처리
+sample_image = plt.imread(x_train[0])
+plt.imshow(sample_image)
 
-
-
+tf.image.convert_image_dtype(sample_image, tf.float64)
