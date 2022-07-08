@@ -11,6 +11,7 @@ from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 
 import tensorflow as tf
+from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
 
 # 데이터 로드 및 전처리
 ## 1. 라벨 데이터 전처리
@@ -35,4 +36,73 @@ print(len(x_train), len(y_train), len(x_valid), len(y_valid))
 sample_image = plt.imread(x_train[0])
 plt.imshow(sample_image)
 
-tf.image.convert_image_dtype(sample_image, tf.float64)
+## 이미지 크기조정 전처리 함수
+def prep_image(path):
+    image = tf.io.read_file(path)
+    image = tf.io.decode_image(image, channels=3)
+    image = tf.image.convert_image_dtype(image, tf.float64)
+    image = tf.image.resize_with_crop_or_pad(image, 224, 224)
+
+    return image
+
+## 이미지-라벨 매핑 함수
+def get_image_label(path, label):
+    image = prep_image(path)
+
+    return image, label
+
+## 데이터셋 생성함수
+def create_dataset(x, y=None, batch_size = 32,_valid=False, _test=False):
+    # 검증용 데이터 셋 생성
+    if _valid:
+        data = tf.data.Dataset.from_tensor_slices((tf.constant(x), tf.constant(y)))
+        data = data.map(get_image_label).batch(batch_size)
+
+        return data
+
+    # 테스트 데이터 셋 생성
+    elif _test:
+        data = tf.data.Dataset.from_tensor_slices(tf.constant(x))
+        data = data.map(prep_image).batch(batch_size)
+
+        return data
+
+    # 학습용 데이터 셋 생성
+    else:
+        data = tf.data.Dataset.from_tensor_slices((tf.constant(x), tf.constant(y))).shuffle(buffer_size=len(x))
+        data = data.map(get_image_label).batch(batch_size)
+
+        return data
+
+train_set = create_dataset(x_train, y_train)
+valid_set = create_dataset(x_valid, y_valid)
+
+# 6. 모델링
+base_model = MobileNetV2(include_top=False, classes=len(classes))
+
+base_model.trainable = False
+
+input = tf.keras.layers.Input(shape=(224, 224, 3))
+model = base_model(input, training=False)
+model = tf.keras.layers.GlobalAveragePooling2D(name="global_avg_pool")(model)
+model = tf.keras.layers.Dropout(0.2)(model)
+output = tf.keras.layers.Dense(len(classes), activation="softmax")(model)
+
+clf_model = tf.keras.Model(input, output)
+clf_model.compile(loss='categorical_crossentropy', optimizer=tf.keras.optimizers.Adam(), metrics=['accuracy'])
+
+EarlyStoppingCallbacks = tf.keras.callbacks.EarlyStopping(\
+    monitor='val_loss', patience=2, baseline=None, restore_best_weights=True\
+)
+
+# 모델 학습하기
+history = clf_model.fit(\
+    train_set,\
+    epochs=100,\
+    validation_data=valid_set,\
+    validation_step=len(valid_set),\
+    callbacks=[EarlyStoppingCallbacks]\
+)
+
+
+
