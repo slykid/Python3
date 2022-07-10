@@ -100,9 +100,18 @@ history = clf_model.fit(\
     train_set,\
     epochs=100,\
     validation_data=valid_set,\
-    validation_step=len(valid_set),\
     callbacks=[EarlyStoppingCallbacks]\
 )
 
+# 테스트 데이터 생성
+test_path = "data/dog-breed-identification/test/"
+test_filenames = [test_path + fname for fname in os.listdir(test_path)]
+test_dataset = create_dataset(test_filenames, _test=True)
 
+y_pred = clf_model.predict(test_dataset)
 
+df_preds = pd.DataFrame(columns=["id"] + list(classes))
+df_preds["id"] = [os.path.splitext(path)[0] for path in os.listdir(test_path)]
+df_preds[list(classes)] = y_pred
+
+df_preds.to_csv("result/dog-breed-identification/submission2.csv", index=False)
