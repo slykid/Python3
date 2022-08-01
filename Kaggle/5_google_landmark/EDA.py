@@ -62,6 +62,26 @@ train_generator = data_generator.flow_from_dataframe(
     shuffle=True, seed=1234, subset='training'
 )
 
+# test dataset
+test_list = glob.glob("data/google_landmark/test/*/*/*/*.jpg")
+for i in range(0, len(test_list)):
+    test_list[i] = test_list[i].replace("\\", "/", 5)
+
+test_label = pd.DataFrame(test_list, columns=["path"])
+test_label["id"] = test_label["path"].apply(lambda x: x.split("/")[-1].split(".jpg")[0])
+test_label = test_label[["id", "path"]]
+
+# index dataset
+index_list = glob.glob("data/google_landmark/index/*/*/*/*.jpg")
+for i in range(0, len(index_list)):
+    index_list[i] = index_list[i].replace("\\", "/", 5)
+
+index_label = pd.DataFrame(index_list, columns=["path"])
+index_label["id"] = index_label["path"].apply(lambda x: x.split("/")[-1].split(".jpg")[0])
+index_label = index_label[["id", "path"]]
+
+
+
 # Model
 def _conv_block(inputs, filters, kernel, strides):
     x = tf.keras.layers.Conv2D(filters, kernel, padding='same', strides=strides)(inputs)
