@@ -71,6 +71,16 @@ test_label = pd.DataFrame(test_list, columns=["path"])
 test_label["id"] = test_label["path"].apply(lambda x: x.split("/")[-1].split(".jpg")[0])
 test_label = test_label[["id", "path"]]
 
+test_generator = ImageDataGenerator(rescale=1./255.)
+
+test_generator = test_generator.flow_from_dataframe(
+    test_label,
+    directory='data/google_landmark/test',
+    x_col="filename", target_size=(IMG_WIDTH, IMG_HEIGHT),
+    class_mode=None, batch_size=BATCH_SIZE, shuffle=False
+)
+
+
 # index dataset
 index_list = glob.glob("data/google_landmark/index/*/*/*/*.jpg")
 for i in range(0, len(index_list)):
