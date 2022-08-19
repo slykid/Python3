@@ -81,7 +81,6 @@ index_label["id"] = index_label["path"].apply(lambda x: x.split("/")[-1].split("
 index_label = index_label[["id", "path"]]
 
 
-
 # Model
 def _conv_block(inputs, filters, kernel, strides):
     x = tf.keras.layers.Conv2D(filters, kernel, padding='same', strides=strides)(inputs)
