@@ -26,20 +26,11 @@ IMG_HEIGHT = 224
 BATCH_SIZE = 32
 
 # make image path
-label = pd.read_csv("data/google_landmark/train.csv")
-label["file_path"] = label["id"].apply(lambda x: "data/google_landmark/train/" + x[0] + "/" + x[1] + "/" + x[2] + "/" + x + ".jpg")
-label["landmark_id"] = label["landmark_id"].apply(lambda x: str(x))
-train_files = label["file_path"].to_list()
+train = pd.read_csv("data/google_landmark/train.csv")
 
-# 최초 1회만 실행
-for i in range(0, len(train_files)):
-    try:
-        shutil.move(train_files[i], "data/google_landmark/train")
-    except:
-        continue
-print("Complete move files!!")
-
-label["file_path"] = label["id"].apply(lambda x: "data/google_landmark/train/" + x + ".jpg")
+train_list = glob.glob("data/google_landmark/train/*/*/*/*.jpg")
+for i in range(0, len(train_list)):
+    train_list[i] = train_list[i].replace("\\", "/", 5)
 
 # load sample image
 sample_img = cv2.imread(np.random.choice(train_files))
