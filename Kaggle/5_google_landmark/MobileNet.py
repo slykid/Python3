@@ -10,7 +10,7 @@ from sklearn.metrics import accuracy_score
 
 import tensorflow as tf
 from tensorflow.keras.layers import Conv2D, MaxPool2D, BatchNormalization, InputLayer, DepthwiseConv2D, ReLU
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.utils import image_dataset_from_directory
 from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.metrics import Precision, Recall
@@ -18,7 +18,7 @@ from tensorflow.keras.callbacks import EarlyStopping
 
 from matplotlib import pyplot as plt
 
-print(tf.__version__)  # 2.8.0
+print(tf.__version__)  # 2.9.1
 
 # variables
 IMG_WIDTH = 224
@@ -27,62 +27,50 @@ BATCH_SIZE = 32
 
 # make image path
 train = pd.read_csv("data/google_landmark/train.csv")
+print(train.info)
+print(train.dtypes)
+len(pd.unique(train["landmark_id"]))  # 81313
 
-train_list = glob.glob("data/google_landmark/train/*/*/*/*.jpg")
-for i in range(0, len(train_list)):
-    train_list[i] = train_list[i].replace("\\", "/", 5)
+# 분류 문제이므로 class 를 문자열로 변환함
+train["landmark_id"] = train["landmark_id"].apply(lambda x: str(x))
 
-# load sample image
-sample_img = cv2.imread(np.random.choice(train_files))
-plt.imshow(sample_img)
-print("image shape:" + str(sample_img.shape) + "\n")
+train_path = glob.glob("data\\google_landmark\\train\\*\\*\\*\\*.jpg")
+df_path = pd.DataFrame(train_path, columns=["path"])
+df_path["id"] = df_path["path"].apply(lambda x: x.split("\\")[-1].split(".jpg")[0])
+train_prep = train.merge(df_path, how="inner", on="id", sort=True)
+train_prep = train_prep[["id", "path", "landmark_id"]]
+print(train_prep.dtypes)
 
-# image processing
-data_generator = ImageDataGenerator(
-    rescale=1./255., validation_split=0.2, rotation_range=20,
-    zoom_range=0.1, width_shift_range=0.2, height_shift_range=0.2,
-    shear_range=0.1, horizontal_flip=True, fill_mode="nearest"
-)
+# 학습 데이터 셋 생셩
+## 학습:검증 = 8:2
+list_ds = tf.data.Dataset.list_files(train_prep["path"], shuffle=False)
 
-train_generator = data_generator.flow_from_dataframe(
-    label,
-    directory='data/google_landmark/train',
-    x_col='file_path', y_col='landmark_id',
-    target_size=(IMG_WIDTH, IMG_HEIGHT),
-    class_mode='categorical', batch_size=BATCH_SIZE,
-    shuffle=True, seed=1234, subset='training'
-)
+valid_size = int(len(train_prep["path"]) * 0.2)
+train_ds = list_ds.skip(valid_size)
+valid_ds = list_ds.take(valid_size)
 
-# test dataset
-test_list = glob.glob("data/google_landmark/test/*/*/*/*.jpg")
-for i in range(0, len(test_list)):
-    test_list[i] = test_list[i].replace("\\", "/", 5)
+def get_label(file_path):
+    label = train_prep.loc[file_path == train_prep["path"], "landmark_id"][0]
+    return tf.argmax(label)
 
-test_label = pd.DataFrame(test_list, columns=["path"])
-test_label["id"] = test_label["path"].apply(lambda x: x.split("/")[-1].split(".jpg")[0])
-test_label = test_label[["id", "path"]]
+def process_path(file_path):
+    label = get_label(file_path)
+    img = tf.io.read_file(file_path)
+    img = tf.io.decode_jpeg(img)
+    img = tf.image.resize(img, [IMG_HEIGHT, IMG_WIDTH])
 
-test_generator = ImageDataGenerator(rescale=1./255.)
+    return img, label
 
-test_generator = test_generator.flow_from_dataframe(
-    test_label,
-    directory='data/google_landmark/test',
-    x_col="filename", target_size=(IMG_WIDTH, IMG_HEIGHT),
-    class_mode=None, batch_size=BATCH_SIZE, shuffle=False
-)
+# 데이터셋 생성
+train_ds = train_ds.map(process_path, num_parallel_calls=tf.data.AUTOTUNE)
+valid_ds = valid_ds.map(process_path, num_parallel_calls=tf.data.AUTOTUNE)
 
+# Check
+for image, label in train_ds.take(1):
+    print("Image shape: ", image.numpy().shape)
+    print("Label: ", label.numpy())
 
-# index dataset
-index_list = glob.glob("data/google_landmark/index/*/*/*/*.jpg")
-for i in range(0, len(index_list)):
-    index_list[i] = index_list[i].replace("\\", "/", 5)
-
-index_label = pd.DataFrame(index_list, columns=["path"])
-index_label["id"] = index_label["path"].apply(lambda x: x.split("/")[-1].split(".jpg")[0])
-index_label = index_label[["id", "path"]]
-
-
-# Model
+# Modeling
 def _conv_block(inputs, filters, kernel, strides):
     x = tf.keras.layers.Conv2D(filters, kernel, padding='same', strides=strides)(inputs)
     x = tf.keras.layers.BatchNormalization()(x)
@@ -149,4 +137,4 @@ early_stop = tf.keras.callbacks.EarlyStopping(monitor='val_acc', patience=30, ve
 
 model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['acc'])
 
-history = model.fit(train_generator, epochs=50, callbacks=[early_stop])
+history = model.fit(train_ds, epochs=50, callbacks=[early_stop])
