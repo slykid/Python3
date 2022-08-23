@@ -1,7 +1,6 @@
-.idea/*
-data/*
-driver/*
-result/*
-venv/*
+.idea/
+data/
+driver/
+result/
+venv/
 .idea/Python3.iml
-.idea/misc.xml

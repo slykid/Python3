@@ -7,7 +7,6 @@
       <sourceFolder url="file://$MODULE_DIR$/Python Deep Learning Code" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Python Machine Learning Code" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Field Test Code" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/S020" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CodingTest_Example" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Kaggle" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Kaggle/1_Titanic_disaster" isTestSource="false" />
@@ -15,13 +14,13 @@
       <sourceFolder url="file://$MODULE_DIR$/Crawler" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Kaggle/3_NBME" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Kaggle/4_dog_breed_classification" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/Pytorch" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Kaggle/5_google_landmark" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
       <excludeFolder url="file://$MODULE_DIR$/data" />
       <excludeFolder url="file://$MODULE_DIR$/driver" />
       <excludeFolder url="file://$MODULE_DIR$/result" />
       <excludeFolder url="file://$MODULE_DIR$/logs" />
+      <excludeFolder url="file://$MODULE_DIR$/.idea" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.9 (python3)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
