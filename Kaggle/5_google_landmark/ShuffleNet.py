@@ -41,6 +41,16 @@ train_prep = train.merge(df_path, how="inner", on="id", sort=True)
 train_prep = train_prep[["id", "path", "landmark_id"]]
 print(train_prep.dtypes)
 
+sample_list = []
+for path in train_path:
+    sample = tf.keras.utils.load_img(path)
+    sample = tf.keras.utils.img_to_array(sample)
+
+    sample_list.append(sample)
+
+label = tf.keras.utils.to_categorical(train_prep["landmark_id"].apply(lambda x: str(x)))
+
+
 # 학습 데이터 셋 생셩
 ## 학습:검증 = 8:2
 list_ds = tf.data.Dataset.list_files(train_prep["path"], shuffle=False)
