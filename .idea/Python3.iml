@@ -15,6 +15,7 @@
       <sourceFolder url="file://$MODULE_DIR$/Kaggle/3_NBME" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Kaggle/4_dog_breed_classification" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Kaggle/5_google_landmark" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/OpenCV" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
       <excludeFolder url="file://$MODULE_DIR$/data" />
       <excludeFolder url="file://$MODULE_DIR$/driver" />
@@ -22,7 +23,7 @@
       <excludeFolder url="file://$MODULE_DIR$/logs" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.9 (python3)" jdkType="Python SDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TestRunnerService">
