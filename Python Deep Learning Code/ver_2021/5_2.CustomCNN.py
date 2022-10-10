@@ -101,7 +101,7 @@ def CustomDeepCNN(input_shape, classes):
 model = CustomSwallowCNN(input_shape=INPUT_SHAPE, classes=CLASSES)
 model.compile(loss="categorical_crossentropy", optimizer=OPTIMIZER, metrics=["accuracy"])
 
-callbacks = [tf.keras.callbacks.TensorBoard(log_dir="./logs/20211004/CustomSwallowCNN")]
+callbacks = [tf.keras.callbacks.TensorBoard(log_dir="../../logs/20211004/CustomSwallowCNN")]
 
 model.fit(x_train, y_train, batch_size=BATCH_SIZE, epochs=EPOCHS, validation_split=VALIDATION_SPLIT,callbacks=callbacks)
 
@@ -113,7 +113,7 @@ print("\nTest Accuracy:", score[1])  # 0.668
 # Deep CNN
 model2 = CustomDeepCNN(input_shape=INPUT_SHAPE, classes=CLASSES)
 model2.compile(loss="categorical_crossentropy", optimizer=OPTIMIZER, metrics=["accuracy"])
-callbacks = [tf.keras.callbacks.TensorBoard(log_dir="./logs/20211004/CustomDeepCNN")]
+callbacks = [tf.keras.callbacks.TensorBoard(log_dir="../../logs/20211004/CustomDeepCNN")]
 
 model2.fit(x_train, y_train, batch_size=BATCH_SIZE, epochs=EPOCHS, validation_split=VALIDATION_SPLIT,callbacks=callbacks)
 

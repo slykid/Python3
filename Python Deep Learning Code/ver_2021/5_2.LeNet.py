@@ -57,7 +57,7 @@ model.compile(loss="categorical_crossentropy", optimizer=OPTIMIZER, metrics=["ac
 model.summary()
 
 ## 텐서보드 사용
-callbacks = [tf.keras.callbacks.TensorBoard(log_dir="./logs")]
+callbacks = [tf.keras.callbacks.TensorBoard(log_dir="../../logs")]
 
 history = model.fit(
     x_train, y_train,
