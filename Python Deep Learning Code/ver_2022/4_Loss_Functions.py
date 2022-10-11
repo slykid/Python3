@@ -88,3 +88,46 @@ dataset = dataset.batch(batch_size)
 for x, y in dataset:
     print("X: {} \n\nY: {}".format(x, y))
     print(x.shape, y.shape)
+
+# 2. Loss Functions
+# 2-1. MSE (Mean Squared Error)
+# 2-1-1. Calculation
+import tensorflow as tf
+from tensorflow.keras.losses import MeanSquaredError
+
+N, n_features = 100, 5
+batch_size = 32
+
+loss_object = MeanSquaredError()
+
+batch_size = 32
+predictions = tf.random.normal(shape=(batch_size, 1))
+labels = tf.random.normal(shape=(batch_size, 1))
+
+mse = loss_object(labels, predictions)
+mse_manual = tf.reduce_mean(tf.math.pow(labels - predictions, 2))
+print("MSE(Tensorflow): ", mse.numpy())  # MSE(Tensorflow):  2.1063626
+print("MSE(manual): ", mse_manual.numpy())  # MSE(manual):  2.1063626
+
+# 2-1-2. MSE with Model/Dataset
+import tensorflow as tf
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.losses import MeanSquaredError
+
+N, n_features = 100, 5
+batch_size = 32
+
+X = tf.random.normal(shape=(N, n_features))
+Y = tf.random.normal(shape=(N, 1))
+
+dataset = tf.data.Dataset.from_tensor_slices((X, Y))
+dataset = dataset.batch(batch_size)
+
+model = Dense(units=1, activation="linear")
+loss_object = MeanSquaredError()
+
+for x, y in dataset:
+    predictions = model(x)
+    loss = loss_object(y, predictions)
+
+    print("Loss: " + str(loss.numpy()))
