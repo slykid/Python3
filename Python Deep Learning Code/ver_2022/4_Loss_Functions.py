@@ -131,3 +131,75 @@ for x, y in dataset:
     loss = loss_object(y, predictions)
 
     print("Loss: " + str(loss.numpy()))
+
+
+# 2-2. Binary Cross Entropy
+# 2-2-1. BCE Calculation
+import tensorflow as tf
+from tensorflow.keras.losses import BinaryCrossentropy
+
+batch_size = 32
+n_classes = 2
+
+predictions = tf.random.uniform(shape=(batch_size, 1))
+labels = tf.random.uniform(shape=(batch_size, 1), minval=0, maxval=n_classes, dtype=tf.int32)
+
+print(predictions)
+print(labels)
+
+loss_object = BinaryCrossentropy()
+loss = loss_object(labels, predictions)
+
+labels = tf.cast(labels, tf.float32)
+bce_manual = -(labels * tf.math.log(predictions) + (1 - labels) * tf.math.log(1 - predictions))
+bce_manual = tf.reduce_mean(bce_manual)
+
+print("BCE(Tensorflow): ", loss.numpy())  # BCE(Tensorflow):  0.8595582
+print("BCE(Manual): ", bce_manual.numpy())  # BCE(Manual):  0.85955864
+
+# 2-2-2. BCE with Model/Dataset
+import tensorflow as tf
+
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.losses import BinaryCrossentropy
+
+N, n_features = 8, 5
+
+t_weights = tf.constant([1, 2, 3, 4, 5], dtype=tf.float32)
+t_bias = tf.constant([10], dtype=tf.float32)
+
+X = tf.random.normal(mean=0, stddev=1, shape=(N, n_features))
+Y = tf.reduce_sum(t_weights * X, axis=1) + t_bias
+Y = tf.cast(Y > 5, tf.int32)
+
+dataset = tf.data.Dataset.from_tensor_slices((X, Y))
+dataset = dataset.batch(batch_size)
+
+model = Dense(units=1, activation='sigmoid')
+loss_object = BinaryCrossentropy()
+
+for x, y in dataset:
+    predictions = model(x)
+    loss = loss_object(y, predictions)
+    print("Loss: ", loss.numpy())  # Loss:  0.68282413
+
+# 2-3. Sparse Categorical Cross Entropy
+# 2-3-1.
+
+
+
+
+# 2-3-2.
+
+
+
+# 2-4. Categorical Cross Entropy
+# 2-4-1.
+
+
+
+
+# 2-4-2.
+
+
+
