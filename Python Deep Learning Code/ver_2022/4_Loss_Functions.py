@@ -184,7 +184,32 @@ for x, y in dataset:
     print("Loss: ", loss.numpy())  # Loss:  0.68282413
 
 # 2-3. Sparse Categorical Cross Entropy
-# 2-3-1.
+# 2-3-1. SCCE Calculation
+import tensorflow as tf
+
+from tensorflow.keras.losses import SparseCategoricalCrossentropy
+
+batch_size, n_classes = 16, 5
+
+predictions = tf.random.uniform(shape=(batch_size, n_classes), minval=0, maxval=1, dtype=tf.float32)
+pred_sum = tf.reshape(tf.reduce_sum(predictions, axis=1), (-1, 1))
+print(predictions.shape, pred_sum.shape)
+
+predictions /= pred_sum
+labels = tf.random.uniform(shape=(batch_size, ), minval=0, maxval=n_classes, dtype=tf.int32)
+
+print(labels)
+
+loss_object = SparseCategoricalCrossentropy()
+loss = loss_object(labels, predictions)
+print("Loss: ", loss.numpy())  # Loss:  1.7217846
+
+ce = 0
+for label, prediction in zip(labels, predictions):
+    ce += -tf.math.log(prediction[label])
+ce /= batch_size
+print("Cross Entropy: ", ce.numpy())  # Cross Entropy:  1.7217847
+
 
 
 
