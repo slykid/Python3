@@ -210,21 +210,72 @@ for label, prediction in zip(labels, predictions):
 ce /= batch_size
 print("Cross Entropy: ", ce.numpy())  # Cross Entropy:  1.7217847
 
+# 2-3-2. SCCE with Model/Dataset
+import tensorflow as tf
 
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.losses import SparseCategoricalCrossentropy
 
+N, n_features = 100, 2
+n_classes = 3
+batch_size = 16
 
+X = tf.zeros(shape=(0, n_features))
+Y = tf.zeros(shape=(0, 1), dtype=tf.int32)
 
-# 2-3-2.
+for class_idx in range(n_classes):
+    center = tf.random.uniform(minval=-15, maxval=15, shape=(2, ))
 
+    x1 = center[0] + tf.random.normal(shape=(N, 1))
+    x2 = center[1] + tf.random.normal(shape=(N, 1))
 
+    x = tf.concat((x1, x2), axis=1)
+    y = class_idx * tf.ones(shape=(N, 1), dtype=tf.int32)
+
+    X = tf.concat((X, x), axis=0)
+    Y = tf.concat((Y, y), axis=0)
+
+dataset = tf.data.Dataset.from_tensor_slices((X, Y))
+dataset = dataset.batch(batch_size)
+
+model = Dense(units=n_classes, activation='softmax')
+loss_object = SparseCategoricalCrossentropy()
+
+for x, y in dataset:
+    predictions = model(x)
+    loss = loss_object(y, predictions)
+    print(loss.numpy())
+
+print("\nLoss: " + str(loss.numpy()))  # Loss: 0.62953514
 
 # 2-4. Categorical Cross Entropy
-# 2-4-1.
+# 2-4-1. CCE Calculation
+import tensorflow as tf
 
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.losses import CategoricalCrossentropy
 
+batch_size, n_classes = 16, 5
 
+predictions = tf.random.uniform(shape=(batch_size, n_classes), minval=0, maxval=1, dtype=tf.float32)
+pred_sum = tf.reshape(tf.reduce_sum(predictions, axis=1), (-1, 1))
+print(predictions.shape, pred_sum.shape)
 
-# 2-4-2.
+predictions = predictions/pred_sum
+labels = tf.random.uniform(shape=(batch_size, ), minval=0, maxval=n_classes, dtype=tf.int32)
+labels = tf.one_hot(labels, n_classes)
+
+print(labels)
+
+loss_object = CategoricalCrossentropy()
+loss = loss_object(labels, predictions)
+print("Loss: ", loss.numpy())  # Loss: 1.8669639
+
+cce_man = tf.reduce_mean(tf.reduce_sum(-labels * tf.math.log(predictions), axis=1))
+print("CCE (Manual): ", cce_man.numpy())  # CCE (Manual):  1.8669641
+
+# 2-4-2. CCE with Model/Dataset
+
 
 
 
