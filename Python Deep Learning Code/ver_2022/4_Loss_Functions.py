@@ -275,7 +275,41 @@ cce_man = tf.reduce_mean(tf.reduce_sum(-labels * tf.math.log(predictions), axis=
 print("CCE (Manual): ", cce_man.numpy())  # CCE (Manual):  1.8669641
 
 # 2-4-2. CCE with Model/Dataset
+import tensorflow as tf
 
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.losses import CategoricalCrossentropy
 
+N, n_features = 8, 2
+n_classes = 5
+batch_size = 32
 
+X = tf.zeros(shape=(0, n_features))
+Y = tf.zeros(shape=(0, ), dtype=tf.int32)
 
+for class_idx in range(n_classes):
+    center = tf.random.uniform(minval=-15, maxval=15, shape=(2, ))
+
+    x1 = center[0] + tf.random.normal(shape=(N, 1))
+    x2 = center[1] + tf.random.normal(shape=(N, 1))
+
+    x = tf.concat((x1, x2), axis=1)
+    y = class_idx * tf.ones(shape=(N, ), dtype=tf.int32)
+
+    X = tf.concat((X, x), axis=0)
+    Y = tf.concat((Y, y), axis=0)
+
+Y = tf.one_hot(Y, depth=n_classes, dtype=tf.int32)
+
+dataset = tf.data.Dataset.from_tensor_slices((X, Y))
+dataset = dataset.batch(batch_size)
+
+model = Dense(units=n_classes, activation="softmax")
+loss_object = CategoricalCrossentropy()
+
+for x, y in dataset:
+    predictions = model(x)
+    loss = loss_object(y, predictions)
+    print(loss.numpy())
+
+print("Loss: ", loss.numpy())  # Loss:  7.047408
