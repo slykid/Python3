@@ -1,5 +1,83 @@
 # 1. Conv2D Layers
+# 1) Shapes of Conv Layers
+import tensorflow as tf
 
+from tensorflow.keras.layers import Conv2D
+
+N, n_H, n_W, n_C = 1, 28, 28, 1
+n_filter = 1
+k_size = 3
+
+images = tf.random.uniform(minval=0, maxval=1, shape=(N, n_H, n_W, n_C))
+
+conv = Conv2D(filters=n_filter, kernel_size=k_size)
+y = conv(images)
+
+W, b = conv.get_weights()
+
+print(images.shape)
+print(W.shape)
+print(b.shape)
+print(y.shape)
+
+# 2) Correlation Calculation
+import numpy as np
+import tensorflow as tf
+
+from tensorflow.keras.layers import Conv2D
+
+N, n_H, n_W, n_C = 1, 5, 5, 1
+n_filter = 1
+k_size = 3
+
+images = tf.random.uniform(minval=0, maxval=1, shape=(N, n_H, n_W, n_C))
+
+conv = Conv2D(filters=n_filter, kernel_size=k_size)
+y = conv(images)
+W, b = conv.get_weights()
+
+print("Y(Tensorflow): \n", y.numpy)
+images = images.numpy().squeeze()
+W = W.squeeze()
+
+y_man = np.zeros(shape=(n_H - k_size + 1, n_W - k_size + 1))
+for i in range(n_H - k_size + 1):
+    for j in range(n_W - k_size + 1):
+        window = images[i : i + k_size, j : j+k_size]
+        y_man[i, j] = np.sum(window * W) + b
+
+print("Y(manual): \n", y_man)
+
+# 3) Correlation with n-channel
+import numpy as np
+import tensorflow as tf
+
+from tensorflow.keras.layers import Conv2D
+
+N, n_H, n_W, n_C = 1, 5, 5, 3
+n_filter = 1
+k_size = 3
+
+images = tf.random.uniform(minval=0, maxval=1, shape=(N, n_H, n_W, n_C))
+
+conv = Conv2D(filters=n_filter, kernel_size=k_size)
+y = conv(images)
+W, b = conv.get_weights()
+
+print("Y(Tensorflow): \n", y.numpy().squeeze())
+
+images = images.numpy().squeeze()
+W = W.squeeze()
+print(images.shape)
+print(W.shape)
+
+y_man = np.zeros(shape=(n_H - k_size + 1, n_W - k_size + 1))
+for i in range(n_H - k_size + 1):
+    for j in range(n_W - k_size + 1):
+        window = images[i : i + k_size, j : j+k_size, :]
+        y_man[i, j] = np.sum(window * W) + b
+
+print("Y(manual): \n", y_man)
 
 # 2. Conv2D with Filter
 # 1) Shape with Filters
