@@ -12,6 +12,10 @@ from sklearn.model_selection import train_test_split
 
 import tensorflow as tf
 from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
+from tensorflow.python.client import device_lib
+
+device_lib.list_local_devices()
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 # 데이터 로드 및 전처리
 ## 1. 라벨 데이터 전처리
