@@ -11,6 +11,21 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 
+class CustomDataset(Dataset):
+    def __init__(self, data, labels):
+        self.data = data
+        self.labels = labels
+
+        super().__init__()
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        return self.data[idx], self.labels[idx]
+
+
+
 cancer = load_breast_cancer()
 
 df = pd.DataFrame(cancer.data, columns=cancer.feature_names)
@@ -50,19 +65,6 @@ n_epochs = 10000
 batch_size = 128
 print_interval = 500
 early_stop = 100
-
-class CustomDataset(Dataset):
-    def __init__(self, data, labels):
-        self.data = data
-        self.labels = labels
-
-        super().__init__()
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        return self.data[idx], self.labels[idx]
 
 train_loader = DataLoader(
     dataset=CustomDataset(x[0], y[0]),
