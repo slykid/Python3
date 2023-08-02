@@ -46,23 +46,10 @@ label = pd.unique(train.menu3_nm.apply(lambda x: str(x))).tolist()
 label.sort()
 label = [x for x in label if x != 'nan']
 label_num = {word : num for num, word in enumerate(label)}
-train.menu3_nm = train.menu3_nm.map(label_num)
-
-
+train["label"] = train["menu3_nm"].map(label_num)
 
 # tokenizer
-# tokenizer = BertWordPieceTokenizer(strip_accents=False, lowercase=False)
 tokenizer= BertTokenizerFast.from_pretrained('kykim/bert-kor-base',strip_accents=False, lowercase=False)  # 로드
-#
-# tokenizer.train(
-#     files=["data/pos_menu/menu_data_2022.csv"],
-#     vocab_size=32000,
-#     min_frequency=5,
-#     limit_alphabet=6000,
-#     show_progress=True
-# )
-# print('train complete')
-
 tokenizer.get_vocab()
 
 # tokenizer에 special token 추가
@@ -116,7 +103,17 @@ class TokenDataset(Dataset):
         }, torch.tensor(label)
 
 
+CHECKPOINT_NAME = 'kykim/bert-kor-base'
+tokenizer_pretrained = CHECKPOINT_NAME
 
+# train, test 데이터셋 생성
+train_data = TokenDataset(train, tokenizer_pretrained)
+test_data = TokenDataset(test, tokenizer_pretrained)
 
+# DataLoader로 이전에 생성한 Dataset를 지정하여, batch 구성, shuffle, num_workers 등을 설정합니다.
+train_loader = DataLoader(train_data, batch_size=2, shuffle=True, num_workers=2)
+test_loader = DataLoader(test_data, batch_size=2, shuffle=True, num_workers=2)
+
+inputs, labels = next(iter(train_loader))
 
 
