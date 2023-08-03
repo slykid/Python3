@@ -51,11 +51,7 @@ class TokenDataset(Dataset):
         # input_ids: 토큰
         # attention_mask: 실제 단어가 존재하면 1, 패딩이면 0 (패딩은 0이 아닐 수 있습니다)
         # token_type_ids: 문장을 구분하는 id. 단일 문장인 경우에는 전부 0
-        return {
-            'input_ids': input_ids,
-            'attention_mask': attention_mask,
-            'token_type_ids': token_type_ids,
-        }, torch.tensor(label)
+        return {'input_ids': input_ids, 'attention_mask': attention_mask, 'token_type_ids': token_type_ids,}, torch.tensor(label)
 
 
 # 변수 설정
@@ -99,32 +95,36 @@ train = train.reset_index(drop=True)
 test = test.reset_index(drop=True)
 
 # tokenizer
-tokenizer = BertTokenizerFast.from_pretrained("kykim/bert-kor-base")
-tokenizer.get_vocab()
-
-# tokenizer에 special token 추가
-user_defined_symbols = ['[BOS]','[EOS]','[UNK0]','[UNK1]','[UNK2]','[UNK3]','[UNK4]','[UNK5]','[UNK6]','[UNK7]','[UNK8]','[UNK9]']
-unused_token_num = 200
-unused_list = ['[unused{}]'.format(n) for n in range(unused_token_num)]
-user_defined_symbols = user_defined_symbols + unused_list
-
-tokenizer.all_special_tokens
-special_tokens_dict = {'additional_special_tokens': user_defined_symbols}
-tokenizer.add_special_tokens(special_tokens_dict)
-tokenizer.all_special_tokens
+# tokenizer = BertTokenizerFast.from_pretrained("kykim/bert-kor-base")
+# tokenizer.get_vocab()
+#
+# # tokenizer에 special token 추가
+# user_defined_symbols = ['[BOS]','[EOS]','[UNK0]','[UNK1]','[UNK2]','[UNK3]','[UNK4]','[UNK5]','[UNK6]','[UNK7]','[UNK8]','[UNK9]']
+# unused_token_num = 200
+# unused_list = ['[unused{}]'.format(n) for n in range(unused_token_num)]
+# user_defined_symbols = user_defined_symbols + unused_list
+#
+# tokenizer.all_special_tokens
+# special_tokens_dict = {'additional_special_tokens': user_defined_symbols}
+# tokenizer.add_special_tokens(special_tokens_dict)
+# tokenizer.all_special_tokens
 
 
 
 CHECKPOINT_NAME = 'kykim/bert-kor-base'
-tokenizer_pretrained = CHECKPOINT_NAME
 
 # train, test 데이터셋 생성
-train_data = TokenDataset(train, tokenizer_pretrained)
-test_data = TokenDataset(test, tokenizer_pretrained)
+train_data = TokenDataset(train, CHECKPOINT_NAME)
+test_data = TokenDataset(test, CHECKPOINT_NAME)
+
+train_data.data
+train_data.tokenizer
 
 # DataLoader로 이전에 생성한 Dataset를 지정하여, batch 구성, shuffle, num_workers 등을 설정합니다.
-train_loader = DataLoader(train_data, batch_size=2, shuffle=True, num_workers=2)
-test_loader = DataLoader(test_data, batch_size=2, shuffle=True, num_workers=2)
+# - num_worker에 0 이외 숫자부여 시, 병렬화 프로세스 에 피클 데이터를 전달 과정 상 문제로 AttributeError: Can't get attribute 'TokenDataset' on <module '__main__' (built-in)> 에러 발생함
+# - 참고자료: https://www.reddit.com/r/MLQuestions/comments/n9iu83/pytorch_lightning_bert_attributeerror_cant_get/
+train_loader = DataLoader(train_data, batch_size=2, shuffle=True, num_workers=0)
+test_loader = DataLoader(test_data, batch_size=2, shuffle=True, num_workers=0)
 
 inputs, labels = next(iter(train_loader))
 
