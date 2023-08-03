@@ -217,12 +217,12 @@ train = train.reset_index(drop=True)
 test = test.reset_index(drop=True)
 
 # 신규 토큰 추출
-tokenizer = BertWordPieceTokenizer(lowercase=False, trip_accents=False)
+tokenizer = BertWordPieceTokenizer(lowercase=False, strip_accents=False)
 
-corpus_file   = ["data/pos_menu/menu_data_2020.csv"]  # data path
-vocab_size    = 32000
-limit_alphabet= 6000
-output_path   = "result/pos_menu/tokenizer_model"
+corpus_file = ["data/pos_menu/menu_data_2022.csv"]  # data path
+vocab_size = 32000
+limit_alphabet = 6000
+output_path = "result/pos_menu/tokenizer_model"
 min_frequency = 5
 
 # Then train it!
@@ -233,7 +233,11 @@ tokenizer.train(files=corpus_file,
                show_progress=True)
 print('train complete')
 
+tokenizer.save_pretrained("result/pos_menu/tokenizer_model")
+
 # tokenizer에 special token 추가
+tokenizer = BertTokenizerFast.from_pretrained("result/pos_menu/tokenizer_model")
+
 user_defined_symbols = ['[BOS]','[EOS]','[UNK0]','[UNK1]','[UNK2]','[UNK3]','[UNK4]','[UNK5]','[UNK6]','[UNK7]','[UNK8]','[UNK9]']
 unused_token_num = 200
 unused_list = ['[unused{}]'.format(n) for n in range(unused_token_num)]
@@ -253,7 +257,6 @@ new_tokenizer = BertTokenizerFast.from_pretrained("result/pos_menu/tokenizer_mod
 new_token = set(new_tokenizer.get_vocab().keys()) - set(tokenizer.get_vocab().keys())
 tokenizer.add_tokens(new_token)
 tokenizer.save_pretrained("result/pos_menu/menu_token_addition")
-
 
 
 # train, test 데이터셋 생성
