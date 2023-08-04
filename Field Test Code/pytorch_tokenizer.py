@@ -60,10 +60,12 @@ class TokenDataset(Dataset):
         }, torch.tensor(label)
 
 class CustomBertModel(nn.Module):
-    def __init__(self, bert_pretrained, dropout_rate=0.5):
+    def __init__(self, bert_pretrained, token_pretrained, dropout_rate=0.5):
         super(CustomBertModel, self).__init__()
         self.bert = BertModel.from_pretrained(bert_pretrained)
-        # self.bert.resize_token_embedding(len(tokenizer))
+        if bert_pretrained != token_pretrained:
+            self.tokenizer = BertTokenizerFast.from_pretrained(token_pretrained)
+            self.bert.resize_token_embeddings(len(tokenizer))
         self.dr = nn.Dropout(p=dropout_rate)
         self.fc = nn.Linear(768, num_class)
 
@@ -113,66 +115,37 @@ def model_train(model, data_loader, loss_fn, optimizer, device):
         # max probability는 무시하고, max index는 pred에 저장하여 label 값과 대조하여 정확도를 도출합니다.
         _, pred = output.max(dim=1)
 
-        # pred.eq(lbl).sum() 은 정확히 맞춘 label의 합계를 계산합니다. item()은 tensor에서 값을 추출합니다.
-        # 합계는 corr 변수에 누적합니다.
         corr += pred.eq(labels).sum().item()
         counts += len(labels)
-
-        # loss 값은 1개 배치의 평균 손실(loss) 입니다. img.size(0)은 배치사이즈(batch size) 입니다.
-        # loss 와 img.size(0)를 곱하면 1개 배치의 전체 loss가 계산됩니다.
-        # 이를 누적한 뒤 Epoch 종료시 전체 데이터셋의 개수로 나누어 평균 loss를 산출합니다.
         running_loss += loss.item() * labels.size(0)
 
-        # 프로그레스바에 학습 상황 업데이트
         progress_bar.set_description(f"training loss: {running_loss / (idx + 1):.5f}, training accuracy: {corr / counts:.5f}\n")
 
-    # 누적된 정답수를 전체 개수로 나누어 주면 정확도가 산출됩니다.
     acc = corr / len(data_loader.dataset)
 
-    # 평균 손실(loss)과 정확도를 반환합니다.
-    # train_loss, train_acc
     return running_loss / len(data_loader.dataset), acc
 
 
 def model_evaluate(model, data_loader, loss_fn, device):
-    # model.eval()은 모델을 평가모드로 설정을 바꾸어 줍니다.
-    # dropout과 같은 layer의 역할 변경을 위하여 evaluation 진행시 꼭 필요한 절차 입니다.
     model.eval()
 
-    # Gradient가 업데이트 되는 것을 방지 하기 위하여 반드시 필요합니다.
     with torch.no_grad():
-        # loss와 accuracy 계산을 위한 임시 변수 입니다. 0으로 초기화합니다.
         corr = 0
         running_loss = 0
 
-        # 배치별 evaluation을 진행합니다.
         for inputs, labels in data_loader:
-            # inputs, label 데이터를 device 에 올립니다. (cuda:0 혹은 cpu)
+
             inputs = {k: v.to(device) for k, v in inputs.items()}
             labels = labels.to(device)
 
-            # 모델에 Forward Propagation을 하여 결과를 도출합니다.
             output = model(**inputs)
 
-            # output의 max(dim=1)은 max probability와 max index를 반환합니다.
-            # max probability는 무시하고, max index는 pred에 저장하여 label 값과 대조하여 정확도를 도출합니다.
             _, pred = output.max(dim=1)
-
-            # pred.eq(lbl).sum() 은 정확히 맞춘 label의 합계를 계산합니다. item()은 tensor에서 값을 추출합니다.
-            # 합계는 corr 변수에 누적합니다.
             corr += torch.sum(pred.eq(labels)).item()
-
-            # loss 값은 1개 배치의 평균 손실(loss) 입니다. img.size(0)은 배치사이즈(batch size) 입니다.
-            # loss 와 img.size(0)를 곱하면 1개 배치의 전체 loss가 계산됩니다.
-            # 이를 누적한 뒤 Epoch 종료시 전체 데이터셋의 개수로 나누어 평균 loss를 산출합니다.
             running_loss += loss_fn(output, labels).item() * labels.size(0)
 
-        # validation 정확도를 계산합니다.
-        # 누적한 정답숫자를 전체 데이터셋의 숫자로 나누어 최종 accuracy를 산출합니다.
         acc = corr / len(data_loader.dataset)
 
-        # 결과를 반환합니다.
-        # val_loss, val_acc
         return running_loss / len(data_loader.dataset), acc
 
 # 변수 설정
@@ -233,10 +206,10 @@ tokenizer.train(files=corpus_file,
                show_progress=True)
 print('train complete')
 
-tokenizer.save_pretrained("result/pos_menu/tokenizer_model")
+tokenizer.save_model("result/pos_menu/tokenizer_model")
 
 # tokenizer에 special token 추가
-tokenizer = BertTokenizerFast.from_pretrained("result/pos_menu/tokenizer_model")
+tokenizer = BertTokenizerFast.from_pretrained("result/pos_menu/tokenizer_model", lowercase=False, strip_accents=False)
 
 user_defined_symbols = ['[BOS]','[EOS]','[UNK0]','[UNK1]','[UNK2]','[UNK3]','[UNK4]','[UNK5]','[UNK6]','[UNK7]','[UNK8]','[UNK9]']
 unused_token_num = 200
@@ -255,7 +228,7 @@ tokenizer = BertTokenizerFast.from_pretrained("kykim/bert-kor-base")
 new_tokenizer = BertTokenizerFast.from_pretrained("result/pos_menu/tokenizer_model_special")
 
 new_token = set(new_tokenizer.get_vocab().keys()) - set(tokenizer.get_vocab().keys())
-tokenizer.add_tokens(new_token)
+tokenizer.add_tokens(list(new_token))
 tokenizer.save_pretrained("result/pos_menu/menu_token_addition")
 
 
@@ -282,43 +255,21 @@ inputs.keys()
 # key 별 shape 확인
 inputs['input_ids'].shape, inputs['attention_mask'].shape, inputs['token_type_ids'].shape
 
+CHECKPOINT_NAME = "kykim/bert-kor-base"
 config = BertConfig.from_pretrained(CHECKPOINT_NAME)
 config
 
 # labels 출력
 labels
 
-# 모델 생성
-model_bert = BertModel.from_pretrained(CHECKPOINT_NAME, num_labels=num_class).to(device)
-model_bert
-
-# 테스트1. inputs 값 모델에 대입
-output = model_bert(**inputs)
-output.keys()
-output['last_hidden_state'].shape, output['pooler_output'].shape
-
-# last_hidden_state 출력
-last_hidden_state = output['last_hidden_state']
-print(last_hidden_state.shape)
-print(last_hidden_state[:, 0, :])
-
-# pooler_output 출력
-pooler_output = output['pooler_output']
-print(pooler_output.shape)
-print(pooler_output)
-
-fc = nn.Linear(768, num_class)
-fc.to(device)
-fc_output = fc(last_hidden_state[:, 0, :])
-print(fc_output.shape)
-print(fc_output.argmax(dim=1))
-print([k for k, v in label_num.items() if v == int(max(fc_output.argmax(dim=1)))])
-
 # modeling
-CHECKPOINT_NAME = "bert-kor-base"
-bert = CustomBertModel(CHECKPOINT_NAME)
-
+CHECKPOINT_NAME = "kykim/bert-kor-base"
+TOKENPOINT_NAME = "result/pos_menu/menu_token_addition"
+bert = CustomBertModel(CHECKPOINT_NAME,TOKENPOINT_NAME)
 bert.to(device)
+
+bert.tokenizer.get_vocab().get('초밥')
+bert.tokenizer.encode("광어초밥")
 
 loss_fn = nn.CrossEntropyLoss()
 optimizer = optim.Adam(bert.parameters(), lr=1e-5)
