@@ -52,4 +52,3 @@ vector_list = [vectors[v] for v in vocabs]
 ## 테스트
 print(vectors.similarity("연어", "생선"))
 print(vectors.similarity("연어", "알람"))
-
