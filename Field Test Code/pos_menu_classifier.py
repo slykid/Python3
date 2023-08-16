@@ -58,10 +58,10 @@ class TokenDataset(Dataset):
 
 
 class CustomBertModel(nn.Module):
-    def __init__(self, bert_pretrained, token_pretrained, dropout_rate=0.5):
+    def __init__(self, bert_pretrained, dropout_rate=0.5):
         super(CustomBertModel, self).__init__()
         self.bert = BertModel.from_pretrained(bert_pretrained)
-        self.tokenizer = BertTokenizerFast.from_pretrained(token_pretrained)
+        self.tokenizer = BertTokenizerFast.from_pretrained(bert_pretrained)
         self.bert.resize_token_embeddings(len(tokenizer))
         self.dr = nn.Dropout(p=dropout_rate)
         self.fc = nn.Linear(768, num_class)
@@ -72,7 +72,7 @@ class CustomBertModel(nn.Module):
             attention_mask=attention_mask,
             token_type_ids=token_type_ids,
         )
-        last_hidden_state = output["last_hidden_state"]
+        last_hidden_state = output[0]  # output["last_hidden_state"]
         x = self.dr(last_hidden_state[:, 0, :])
         x = self.fc(x)
 
@@ -90,7 +90,7 @@ def model_train(model, data_loader, loss_fn, optimizer, device):
 
     # 예쁘게 Progress Bar를 출력하면서 훈련 상태를 모니터링 하기 위하여 tqdm으로 래핑합니다.
     progress_bar = tqdm(
-        train_loader, unit="batch", total=len(train_loader), mininterval=1
+        data_loader, unit="batch", total=len(train_loader), mininterval=1
     )
 
     # mini-batch 학습을 시작합니다.
@@ -118,10 +118,9 @@ def model_train(model, data_loader, loss_fn, optimizer, device):
         counts += len(labels)
         running_loss += loss.item() * labels.size(0)
 
-        progress_bar.set_description(
-            f"training loss: {running_loss / (idx + 1):.5f}, training accuracy: {corr / counts:.5f}\n"
-        )
-
+    progress_bar.set_description(
+        f"training loss: {running_loss / (idx + 1):.5f}, training accuracy: {corr / counts:.5f}\n"
+    )
     acc = corr / len(data_loader.dataset)
 
     return running_loss / len(data_loader.dataset), acc
@@ -259,10 +258,9 @@ test_loader = DataLoader(test_data, batch_size=8, shuffle=True, num_workers=0)
 # modeling & training
 
 CHECKPOINT_NAME = "Models/bert-kor-base"
-TOKENPOINT_NAME = "Models/bert-kor-base"
 
-tokenizer = BertTokenizerFast.from_pretrained(TOKENPOINT_NAME)
-bert = CustomBertModel(CHECKPOINT_NAME, TOKENPOINT_NAME)
+tokenizer = BertTokenizerFast.from_pretrained(CHECKPOINT_NAME)
+bert = CustomBertModel(CHECKPOINT_NAME)
 bert.to(device)
 
 loss_fn = nn.CrossEntropyLoss()
