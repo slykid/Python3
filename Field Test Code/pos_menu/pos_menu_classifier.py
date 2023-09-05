@@ -157,9 +157,9 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(f"사용 디바이스: {device}")
 
 # 데이터 로드
-train = pd.read_csv("data/pos_menu/train.csv")
-test = pd.read_csv("data/pos_menu/test.csv")
-df_label = pd.read_csv("data/pos_menu/label.csv")
+train = pd.read_csv("../../data/pos_menu/train.csv")
+test = pd.read_csv("../../data/pos_menu/test.csv")
+df_label = pd.read_csv("../../data/pos_menu/label.csv")
 
 num_class = len(df_label.num)
 
