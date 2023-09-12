@@ -20,7 +20,6 @@ def noun_extract(text):
 kiwi = Kiwi()
 kiwi.load_user_dictionary("data/pos_menu/user_menu_dict.txt")
 
-# data_raw = pd.read_csv("/data/pos_menu/pos_menu_target.csv")
 data_raw = pd.read_parquet("data/pos_menu/pos_bill_aggr.parquet")
 data = data_raw.copy()
 data
@@ -30,8 +29,8 @@ data["keywords"] = data["prod_nm"].apply(noun_extract)
 data[["prod_nm", "keywords"]]
 print(data.columns)
 
-keywords = sum(data["keywords"], [])
-keywords
+# keywords = sum(data["keywords"], [])
+# keywords
 
 data["keywords"] = data["keywords"].apply(lambda x: " ".join(x))
 data["keywords"] = data["keywords"].astype(str)
@@ -53,7 +52,7 @@ data = data[
     ]
 ]
 
-df_keyword = pd.DataFrame(keywords, columns=["keywords"])
+# df_keyword = pd.DataFrame(keywords, columns=["keywords"])
 
 data.to_csv("data/pos_menu/pos_menu_target.csv", index=False)
-df_keyword.to_csv("data/pos_menu/keywords.csv", index=False)
+# df_keyword.to_csv("data/pos_menu/keywords.csv", index=False)
