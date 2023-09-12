@@ -76,7 +76,7 @@ def mbkmeans_clusters(X, k, batch_size, print_silhouette_yn):
     return km, km.labels_
 
 
-data_raw = pd.read_csv("../data/pos_menu/result/data_edit.csv")
+data_raw = pd.read_csv("data/pos_menu/pos_menu_target.csv")
 data = data_raw.copy()
 data
 
@@ -134,7 +134,6 @@ data["menu3_emb"] = data["menu3_nm"].apply(lambda x: menu3_dict_rev.get(x))
 
 data = data[
     [
-        "no",
         "label",
         "shop_cd",
         "upjong3_cd",
@@ -142,12 +141,16 @@ data = data[
         "upjong3_emb",
         "prod_nm",
         "keywords",
+        "sale_qty",
+        "price",
+        "tot_sale_amt",
         "menu1_nm",
         "menu1_emb",
         "menu2_nm",
         "menu2_emb",
         "menu3_nm",
         "menu3_emb",
+        "etc",
     ]
 ]
 data
