@@ -143,3 +143,8 @@ features = np.concatenate((scaled_vertorize_tokens, scaled_price), axis=1)
 
 dbscan = DBSCAN(eps=0.5, min_samples=5)
 dbscan.fit(features)
+
+labels = dbscan.fit_predict(features)
+labels
+
+anomaly_label = -1
