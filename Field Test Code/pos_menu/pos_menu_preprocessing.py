@@ -34,6 +34,9 @@ print(data.columns)
 
 data["keywords"] = data["keywords"].apply(lambda x: " ".join(x))
 data["keywords"] = data["keywords"].astype(str)
+
+data["price"] = data["tot_sale_amt"] / data["sale_qty"]
+
 data = data[
     [
         "label",
@@ -43,6 +46,7 @@ data = data[
         "upjong3_nm",
         "prod_nm",
         "keywords",
+        "price",
         "sale_qty",
         "tot_sale_amt",
         "menu1_nm",
