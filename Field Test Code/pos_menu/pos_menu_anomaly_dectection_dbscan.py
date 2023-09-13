@@ -115,6 +115,8 @@ data = data[
 ]
 data
 
+del upjong3_list, menu1_list, menu2_list, menu3_list, upjong3_dict, menu1_dict, menu2_dict, menu3_dict, upjong3_dict_rev, menu1_dict_rev, menu2_dict_rev, menu3_dict_rev
+
 # 토큰 생성
 data["keywords"] = data["keywords"].astype(str)
 data["tokens"] = data["keywords"].apply(lambda x: x.lower().strip().split())
