@@ -1,7 +1,11 @@
+import os
 import numpy as np
 import pandas as pd
+import pandasql as ps
 
 from kiwipiepy import Kiwi
+
+from tokenizers import BertWordPieceTokenizer
 
 
 # 명사 추출 함수 정의
@@ -57,6 +61,85 @@ data = data[
 ]
 
 # df_keyword = pd.DataFrame(keywords, columns=["keywords"])
-
 data.to_csv("data/pos_menu/pos_menu_target.csv", index=False)
-# df_keyword.to_csv("data/pos_menu/keywords.csv", index=False)
+
+
+# WordPiece Tokenizer용 사전 생성
+data = pd.read_csv("data/pos_menu/pos_menu_target.csv")
+
+# WordPiece Tokenizer
+tokenizer = BertWordPieceTokenizer(
+    vocab="Models/bert-kor-base/vocab.txt",
+    clean_text=True,
+    handle_chinese_chars=True,
+    strip_accents=False,  # Must be False if cased model
+    lowercase=True,
+    wordpieces_prefix="##",
+)
+
+tokenizer.train(
+    files="data/pos_menu/menu_corpus.csv",
+    limit_alphabet=6000,
+    vocab_size=22000,
+    min_frequency=25,
+)
+
+if os.path.isdir("result/pos_menu/20230916") is False:
+    os.makedirs("result/pos_menu/20230916")
+
+tokenizer.save("result/pos_menu/20230916/vocab.txt", True)
+
+data["tokens"] = data["edit_prod_nm"].apply(lambda x: tokenizer.encode(str(x)).tokens)
+data["tokens"]
+
+# 토큰 정보 수정
+def dictionary_based_post_process(tokens, user_dict):
+
+    i = 0
+    new_tokens = []
+
+    while i < len(tokens):
+        if str(tokens[i]).replace("##", "") in user_dict["menu_nm"].values():
+            new_tokens.append(tokens[i])
+
+        elif (
+            i < len(tokens) - 1
+            and f"{str(tokens[i]).replace('##', '')}{str(tokens[i+1]).replace('##', '')}"
+            in user_dict["menu_nm"].values()
+        ):
+            new_tokens.append(
+                f"{str(tokens[i]).replace('##', '')}{str(tokens[i+1]).replace('##', '')}"
+            )
+
+            i += 1
+
+        elif (
+            i < len(tokens) - 1
+            and f"{str(tokens[i]).replace('##', '')} {str(tokens[i+1]).replace('##', '')}"
+            in user_dict["menu_nm"].values()
+        ):
+            new_tokens.append(
+                f"{str(tokens[i]).replace('##', '')} {str(tokens[i+1]).replace('##', '')}"
+            )
+            i += 1
+
+    return new_tokens
+
+
+menu_dict = pd.read_csv("data/pos_menu/user_menu_dict.txt", header=None, sep="\t")
+menu_dict.columns = ["menu_nm", "tag", "score"]
+menu_dict = menu_dict[["menu_nm"]]
+menu_dict = menu_dict.to_dict()
+
+new_tokens = []
+
+for token_list in data["tokens"]:
+    new_tokens += dictionary_based_post_process(token_list, menu_dict)
+
+new_tokens
+
+vocab = pd.read_csv("../model/bert-kor-base/vocab.txt")  # <- 에러발생
+vocab
+
+new_vocab = pd.concat([new_tokens, vocab], axis=0)
+new_vocab.to_csv("result/pos_menu/20230911/vocab.txt")
