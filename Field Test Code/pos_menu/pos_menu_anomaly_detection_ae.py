@@ -9,11 +9,12 @@ from tensorflow.keras.models import Model
 
 from tokenizers import BertWordPieceTokenizer
 
-data = pd.read_csv("data/pos_menu/pos_menu_target.csv")
+# data = pd.read_csv("data/pos_menu/pos_menu_target.csv")
+data = pd.read_csv("data/pos_menu/pos_menu.csv")
 
 # 토크나이저 초기화
 tokenizer = BertWordPieceTokenizer(
-    "result/pos_menu/20230911/vocab.txt",
+    "result/pos_menu/tokenizer_model/vocab.txt",
     clean_text=True,
     handle_chinese_chars=True,
     strip_accents=False,  # Must be False if cased model
