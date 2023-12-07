@@ -22,10 +22,9 @@ tokenizer = BertWordPieceTokenizer(
     wordpieces_prefix="##",
 )
 
-data["tokens"] = data["edit_prod_nm"].apply(lambda x: tokenizer.tokenize(x))
-input_sequences = [
-    tokenizer.convert_tokens_to_ids(data["tokens"]) for tokens in data["tokens"]
-]
+# data["tokens"] = data["edit_prod_nm"].apply(lambda x: tokenizer.encode(str(x)).tokens)
+data["tokens"] = data["edit_prod_nm"].apply(lambda x: tokenizer.encode(str(x)).ids)
+input_sequences = data["tokens"]
 max_len = max([len(seq) for seq in input_sequences])
 
 input_sequences = pad_sequences(input_sequences, maxlen=max_len, padding="post")
@@ -37,14 +36,13 @@ test.reset_index(drop=True)
 
 embedding_dim = 50
 hidden_units = 32
+vocab_size = len(tokenizer.get_vocab())
 
 input_layer = Input(shape=(max_len,))
-embedding_layer = Embedding(tokenizer.vocab_size, embedding_dim)(input_layer)
+embedding_layer = Embedding(vocab_size, embedding_dim)(input_layer)
 encoder = LSTM(hidden_units, return_sequences=True)(embedding_layer)
 decoder = LSTM(hidden_units, return_sequences=True)(encoder)
-output_layer = TimeDistributed(Dense(tokenizer.vocab_size, activation="softmax"))(
-    decoder
-)
+output_layer = TimeDistributed(Dense(vocab_size, activation="softmax"))(decoder)
 
 autoencoder = Model(input_layer, output_layer)
 autoencoder.compile(optimizer="adam", loss="sparse_categorical_crossentropy")
@@ -52,7 +50,7 @@ autoencoder.compile(optimizer="adam", loss="sparse_categorical_crossentropy")
 # 모델 훈련
 train_expanded = np.expand_dims(train, axis=-1)
 test_expanded = np.expand_dims(test, axis=-1)
-autoencoder.fit(train, train_expanded, epochs=10, validation_data=(test, test_expanded))
+autoencoder.fit(train_expanded, test_expanded, epochs=10, validation_data=(test, test_expanded))
 
 # 불용어 탐지 함수
 def detect_stop_words(model, sentence):
