@@ -16,6 +16,7 @@
       <sourceFolder url="file://$MODULE_DIR$/Kaggle/4_dog_breed_classification" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/Kaggle/5_google_landmark" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/OpenCV" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Pytorch" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
       <excludeFolder url="file://$MODULE_DIR$/data" />
       <excludeFolder url="file://$MODULE_DIR$/driver" />
