@@ -1,7 +1,9 @@
 import pandas as pd
-
+import matplotlib
 from matplotlib import pyplot as plt
 import seaborn as sns
+
+matplotlib.use('qtagg')
 
 # 실습 데이터 생성
 df = pd.DataFrame({
@@ -35,10 +37,13 @@ sns.scatterplot(x=df["name"], y=df["weight"]);
 plt.axhline(y=df["UCL_W"][0], color='r', linewidth=2)
 plt.axhline(y=df["LCL_W"][0], color='r', linewidth=2)
 plt.gcf().set_size_inches(15, 5)
+plt.show()
+plt.close()
 
 # height plot
 sns.scatterplot(x=df["name"], y=df["height"])
 plt.axhline(y=df["UCL_H"][0], color='r', linewidth=2)
 plt.axhline(y=df["LCL_H"][0], color='r', linewidth=2)
 plt.gcf().set_size_inches(15, 5)
-
+plt.show()
+plt.close()
