@@ -27,7 +27,7 @@ df["LCL_H"] = df["height"].mean() - 2 * df["height"].std()
 
 print(df)  # 데이터 확인
 
-# 시각화
+# BoxPlot 시각화
 plt.style.use(["dark_background"])
 
 # weight plot
