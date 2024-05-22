@@ -8,3 +8,4 @@ print(z)
 
 p_value = 1 - norm.cdf(z)
 print(p_value)
+
