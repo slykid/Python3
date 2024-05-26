@@ -41,7 +41,7 @@ mu, std = res.resid.mean(), res.resid.std()
 print("평균:", mu, "표준편차:", std)  # 평균: -0.13473483767402747 표준편차: 3.879802434937742
 
 # 3-sigma(표준편차)를 기준으로 이상치 판단
-print("이상치 갯수:", len(res.resid[(res.resid>mu+3*std)|(res.resid<mu-3*std)]))  # 이상치 갯수: 10
+print("이상치 갯수:", len( res.resid[(res.resid>mu+3*std) | (res.resid<mu-3*std)]) )  # 이상치 갯수: 10
 
 # 이상 데이터 확인
 co2[res.resid[(res.resid>mu+3*std)|(res.resid<mu-3*std)].index]
