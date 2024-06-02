@@ -59,7 +59,7 @@ plt.xlabel('Fitted values')
 plt.ylabel('Residuals')
 plt.title('Residuals vs Fitted values')
 plt.show()
-plt.savefig("/Users/slykid/Pictures/regression1.jpg")
+plt.savefig("/Users/slykid/Pictures/regression1-residuals.jpg")
 
 # 잔차의 정규성 검토 - Q-Q plot
 sm.qqplot(residuals, line='45')
