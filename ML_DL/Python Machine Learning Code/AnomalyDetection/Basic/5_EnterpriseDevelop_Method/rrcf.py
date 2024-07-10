@@ -4,8 +4,6 @@ import rrcf
 
 import matplotlib
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import colors
 import seaborn as sns
 
 matplotlib.use('qtagg')
