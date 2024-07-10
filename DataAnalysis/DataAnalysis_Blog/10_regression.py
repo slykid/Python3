@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 import statsmodels.api as sm
 
-matplotlib.use("qtagg")
+matplotlib.use("MacOSX")
 
 # 데이터 생성
 np.random.seed(42)

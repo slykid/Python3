@@ -9,7 +9,7 @@ from sklearn.linear_model import Ridge, Lasso, ElasticNet, SGDRegressor
 from sklearn.model_selection import train_test_split
 import statsmodels.api as sm
 
-matplotlib.use('qtagg')
+matplotlib.use("MacOSX")
 np.random.seed(42)
 
 data = pd.read_csv("Dataset/housing_data/housing.data.txt", sep="\s+", header=None)
