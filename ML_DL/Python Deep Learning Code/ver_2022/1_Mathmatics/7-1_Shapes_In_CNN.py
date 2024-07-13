@@ -42,8 +42,6 @@ x = flatten(x)
 print("After flatten: {}".format(x.shape))
 
 # 2) Shapes in the Classifier
-from tensorflow.keras.layers import Dense
-
 n_neurons = [50, 25, 10]
 
 dense1 = Dense(units=n_neurons[0], activation='relu')
@@ -109,28 +107,8 @@ print(y)
 
 loss_obj = CategoricalCrossentropy()
 loss = loss_obj(y, x)
+
 print(loss.shape)
 print(loss)
-
 # ()
 # tf.Tensor(2.3507721, shape=(), dtype=float32)
-
-# 2. CNN Implementation
-# 1) Implementation with Sequential Method
-import tensorflow as tf
-
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D
-from tensorflow.keras.layers import MaxPooling2D
-from tensorflow.keras.layers import Flatten
-from tensorflow.keras.layers import Dense
-
-N, n_H, n_W, n_C = 4, 28, 28, 3
-n_conv_neuron = [10, 20, 30]
-n_dense_neuron = [50, 30, 30]
-kernel_size, padding = 3, "same"
-pool_size, pool_strides = 2, 2
-
-x = tf.random.normal(shape=(N, n_H, n_W, n_C))
-
-model =
