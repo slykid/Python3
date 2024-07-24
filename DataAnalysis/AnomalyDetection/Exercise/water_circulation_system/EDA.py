@@ -25,8 +25,8 @@ import seaborn as sns
 import pyod
 
 # 전역변수 및 설정
-# matplotlib.use("MacOSX")
-matplotlib.use("QtAgg")
+matplotlib.use("MacOSX")
+# matplotlib.use("QtAgg")
 plt.style.use(["dark_background"])
 
 # 데이터 로드
@@ -64,9 +64,9 @@ plt.plot(df_normal.index, df_normal["Accelerometer1RMS"], linestyle='--', color=
 # 2. 시계열 센서 데이터 분석
 # 2.1 센서 별 시각화
 # - 다른 변수들간 이상치에 대한 상관관계 여부를 파악
-df.columns[1:8], len(df.columns[1:8])
+df.columns[1:9], len(df.columns[1:9])
 
-for v, i in enumerate(df.columns[1:8]):
+for v, i in enumerate(df.columns[1:9]):
     plt.figure(figsize=(24, 15))
     # plt.subplot(7, 1, v+1)
     plt.plot(df_anormaly.index, df_anormaly[i], 'o', color='red', markersize=5)
@@ -74,4 +74,25 @@ for v, i in enumerate(df.columns[1:8]):
     plt.plot(df_normal.index, df_normal[i], linestyle='--', color='grey')
     plt.title(i)
 plt.show()
-# 단일 변수만으로는 특별히 이상 현상이 없음
+# 단일 변수만으로는 특별히 이상 현상이 없음 -> 변수들을 복합적으로 활용해 확인 필요
+
+# 2.2 센서별 분포
+n_cols = 3
+n_rows = 3
+
+fig, ax = plt.subplots(ncols=n_cols, nrows=n_rows, figsize=(20, n_rows*5))
+
+for i, col in enumerate(df.columns[1:9]):
+    sns.distplot(df_normal[col], ax=ax[int(i / n_cols), int(i % n_cols)])
+    sns.distplot(df_anormaly[col], ax=ax[int(i / n_cols), int(i % n_cols)])
+
+# 2.3 변수간 상관관계 분석
+df_corr = df.iloc[:, 1:-1]
+
+fig = plt.figure(figsize=(8, 8))
+df_num = df_corr.corr()
+sns.heatmap(df_num, vmin=-1, vmax=+1, annot=True, cmap="coolwarm", linewidths=0.5, mask=np.triu(df_num.corr()))
+
+# 3. 이상탐지 모델링
+# 3.1 Model Selection
+# 3.1.1 Isolation Forest: 다변량에서 효과적
