@@ -22,7 +22,9 @@ import matplotlib
 from matplotlib import pyplot as plt
 import seaborn as sns
 
-import pyod
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import IsolationForest
+from sklearn.metrics import classification_report
 
 # 전역변수 및 설정
 matplotlib.use("MacOSX")
@@ -96,3 +98,50 @@ sns.heatmap(df_num, vmin=-1, vmax=+1, annot=True, cmap="coolwarm", linewidths=0.
 # 3. 이상탐지 모델링
 # 3.1 Model Selection
 # 3.1.1 Isolation Forest: 다변량에서 효과적
+
+X = df.drop(["datetime", "anomaly", "changepoint"], axis=1)
+y = df["anomaly"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, stratify=y, random_state=1234)
+
+print(f"X_train shape: {X_train.shape}")
+print(f"X_test shape: {X_test.shape}")
+print(f"y_train shape: {y_train.shape}")
+print(f"y_train shape: {y_test.shape}")
+
+pd.Series(y_train).value_counts(normalize=True)
+pd.Series(y_test).value_counts(normalize=True)
+
+clf = IsolationForest(max_samples=200, contamination=0.3, random_state=1234)
+clf.fit(X_train)
+
+y_pred_train = clf.predict(X_train)
+y_pred_test = clf.predict(X_test)
+
+y_pred_train = np.where(y_pred_train == -1, 1, 0)
+y_pred_test = np.where(y_pred_test == -1, 1, 0)
+
+# 모델 성능평가
+print(classification_report(y_train, y_pred_train))
+print("------------------------------------------------------------------")
+print(classification_report(y_test, y_pred_test))
+
+# 3.2 Scoring 기반 Threshold 조정
+y_pred_train[0:5], clf.decision_function(X_train)[0:5]
+
+sns.distplot(clf.decision_function(X_train), label="Train")
+sns.distplot(clf.decision_function(X_test), label="Test")
+plt.legend()
+
+# 3.3 Threshold 재조정
+# 3.3.1 score 변수 할당
+## 수치 비교를 하면서 조절해주면 됨
+y_pred_train_score = clf.decision_function(X_train)
+y_pred_test_score = clf.decision_function(X_test)
+
+y_pred_train = np.where(y_pred_train_score < 0.05, 1, 0)
+y_pred_test = np.where(y_pred_test_score < 0.05, 1, 0)
+
+print(classification_report(y_train, y_pred_train))
+print("------------------------------------------------------------------")
+print(classification_report(y_test, y_pred_test))
