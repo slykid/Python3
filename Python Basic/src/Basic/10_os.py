@@ -9,8 +9,8 @@ fout.close()
 os.path.exists('oops.txt')
 os.path.exists('./oops.txt')
 os.path.exists('waffles')
-os.path.exists('.')
-os.path.exists('..')
+os.path.exists('../..')
+os.path.exists('../../..')
 
 # 3. isfile(), isdir(), isabs()
 name = 'oops.txt'
@@ -33,7 +33,7 @@ os.listdir('poems')
 
 # 7. chdir()
 os.chdir('poem')
-os.listdir('.')
+os.listdir('../..')
 
 # 8. subprocess
 import subprocess
