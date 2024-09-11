@@ -111,6 +111,7 @@ plt.legend()
 
 sns.displot(data["Bearing1"])
 
+
 # 4. 시계열 데이터 특성 추출
 data["year"] = data.index.year
 data["month"] = data.index.month
@@ -127,5 +128,35 @@ n_row = 4
 fig, ax = plt.subplots(ncols=n_col, nrows=n_row, figsize=(20, n_row * 5))
 for row, col in enumerate(data.columns[0:4]):
     sns.boxplot(x='date', y=col, data=data, ax=ax[int(row%n_row)])
-
 # plt.savefig()
+# * 도출점: 이상 시점이 실제 시계열 데이터에서 보다 일찍 발생했다!
+
+# 4.2 lag(지연) 데이터 생성
+# - 시계열 데이터에서 이전에 값을 고려할 때 lag(지연) 데이터를 활용함
+# - 시계열 데이터의 특징 상 이전의 결과에 영향을 많이 받음. 때문에 모델 성능을 높이고, 정교하게 만들기 위해 과거의 데이터를 활용해 학습한다.
+
+# 4.2.1 shift 명령어를 사용한 lag 데이터 생성
+data["Bearing1_lag"] = data["Bearing1"].shift(1)  # 1행 아래로 이동함
+data[["Bearing1", "Bearing1_lag"]]
+
+# - NaN 처리
+data["Bearing1_lag"] = data["Bearing1"].shift(1, fill_value=0)
+data[["Bearing1", "Bearing1_lag"]]
+
+# 4.2.2 shift(n) 을 사용한 지연기간 조정
+data["Bearing1_lag1"] = data["Bearing1"].shift(1, fill_value=0)
+data["Bearing1_lag2"] = data["Bearing1"].shift(2, fill_value=0)
+data[["Bearing1", "Bearing1_lag1", "Bearing1_lag2"]]
+
+# 4.2.3 이동평균(Rolling Window)
+# - smoothing 효과
+data["bearing1_ma_3"] = data["Bearing1"].rolling(window=3).mean()
+data[["Bearing1", "bearing1_ma_3"]]
+
+# - NaN 처리
+data["bearing1_ma_3"] = data["Bearing1"].rolling(window=3).mean()
+data["bearing1_ma_3"] = data["bearing1_ma_3"].fillna(value=data["Bearing1"])  # inplace=True 방식은 pandas 3.0 에서 deprecated 예정
+data[["Bearing1", "bearing1_ma_3"]]
+
+
+# 5. 이상탐지 모델링
