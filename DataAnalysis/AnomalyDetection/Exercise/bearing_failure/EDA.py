@@ -10,6 +10,10 @@ import matplotlib
 from matplotlib import pyplot as plt
 import seaborn as sns
 
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+
 matplotlib.use("MacOSX")
 plt.style.use(['dark_background'])
 
@@ -17,7 +21,7 @@ plt.style.use(['dark_background'])
 _path = "/Users/kilhyunkim/workspace/Python3/DataAnalysis/Dataset/anomaly_detection/bearing_failure/"
 
 # 1. 원천 데이터 로드
-if os.path.exists(_path) is False:
+if os.path.exists(_path + "/data.csv") is False:
     print("File doesn't exist!!")
     print("Making dataset!!")
 
@@ -160,3 +164,34 @@ data[["Bearing1", "bearing1_ma_3"]]
 
 
 # 5. 이상탐지 모델링
+# 5.1 Model Selection
+# - 선택 모델: PCA
+# - 근거: 정상 데이터인 경우, 평균을 중심으로 데이터가 유동하고 있으며, 적절한 threshold 값이 설정되면, 이상치를 분류할 수 있음
+data = data[["Bearing1", "Bearing2", "Bearing3", "Bearing4"]]
+
+# scaler 생성
+scaler = StandardScaler()
+
+# 모델 생성
+model = PCA()
+
+# 파이프라인 생성
+pipeline = make_pipeline(scaler, model)
+pipeline.fit(data)
+
+# 차원축소 주성분 개수 확인
+features = range(model.n_components_)
+df_features = pd.DataFrame(features, columns=["pc_feature"])
+df_features.head()
+
+# 모델 설명력 확인
+df_valiance = pd.DataFrame(model.explained_variance_ratio_, columns=["variance"])
+df_pca_features = pd.concat([df_features, df_valiance], axis=1)
+df_pca_features
+
+#    pc_feature  variance
+# 0           0  0.935243
+# 1           1  0.052920
+# 2           2  0.007789
+# 3           3  0.004048
+# -> 주성분 1, 2 만 사용해도 전체 분산의 98% 이상을 설명할 수 있음
