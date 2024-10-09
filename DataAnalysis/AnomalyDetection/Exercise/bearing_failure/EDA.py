@@ -187,7 +187,7 @@ df_features.head()
 # 모델 설명력 확인
 df_valiance = pd.DataFrame(model.explained_variance_ratio_, columns=["variance"])
 df_pca_features = pd.concat([df_features, df_valiance], axis=1)
-df_pca_features
+print(df_pca_features)
 
 #    pc_feature  variance
 # 0           0  0.935243
@@ -195,3 +195,51 @@ df_pca_features
 # 2           2  0.007789
 # 3           3  0.004048
 # -> 주성분 1, 2 만 사용해도 전체 분산의 98% 이상을 설명할 수 있음
+
+# 6. 시각화 및 Threshold 설정
+X_ = StandardScaler().fit_transform(data)
+
+pca = PCA(n_components=2)
+pc = pca.fit_transform(X_)
+
+df_pc = pd.DataFrame(pc, columns=["PC1", "PC2"]).reset_index(drop=True)
+
+plt.rcParams["figure.figsize"] = [5, 8]
+sns.scatterplot(data=df_pc, x="PC1", y="PC2", legend="brief", s=50, linewidth=0.5)
+plt.show()
+# 각 클러스터 중심으로부터 멀리 떨어진 데이터(= 평균 보다 큰 데이터)일 수록 이상치로 판단가능!
+
+# 6.1 Normal Gradle 설정 (-2 ~ 2 사이)
+sns.scatterplot(data=df_pc, x="PC1", y="PC2", legend="brief", s=50, linewidth=0.5)
+plt.vlines(-2, ymin=-1, ymax=1, color='r', linewidth=2)
+plt.vlines(2, ymin=-1, ymax=1, color='r', linewidth=2)
+
+plt.hlines(-1, xmin=-2, xmax=2, color='r', linewidth=2)
+plt.hlines(1, xmin=-2, xmax=2, color='r', linewidth=2)
+
+plt.gcf().set_size_inches(10, 10)
+
+# 6.2 Abnormal Labeling
+# -2 < PC1 < 2 && -1 < PC2 < 1 => 정상 (0) / 그 외 => 이상치 (1)
+df_pc["abnormal"] = np.where( (df_pc["PC1"] > -2) & (df_pc["PC1"] < 2) & (df_pc["PC2"] > -1) & (df_pc["PC2"] < 1), 0, 1)
+df_pc.head(5)
+df_pc["abnormal"].value_counts()
+
+# 6.3 기존 데이터와 비교
+df_pc.index = data.index
+df_pc.head(5)
+
+df_result = pd.concat([data, df_pc], axis=1)
+df_result.head()
+
+# 6.4 Abnormal Points plot
+df_abnormal = df_result[df_result["abnormal"] == 1]
+df_normal = df_result[df_result["abnormal"] == 0]
+
+for v, i in enumerate(data.columns[0:4]):
+    plt.figure(figsize=(24, 15))
+    plt.subplot(4, 1, v + 1)
+    plt.plot(df_abnormal.index, df_abnormal[i], 'o', color='red', markersize=3)
+    plt.plot(df_normal.index, df_normal[i], linestyle='--', color='grey')
+    plt.title(i)
+plt.show()
