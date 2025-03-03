@@ -11,6 +11,10 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.pipeline import Pipeline
+from sklearn.covariance import EllipticEnvelope
+from sklearn.metrics import classification_report
 
 matplotlib.use("MacOSX")
 plt.style.use(['dark_background'])
@@ -171,4 +175,95 @@ tmp["lift"] = round(tmp["ratio"] / target_ratio, 2)
 print(tmp)
 
 
-# 4. 이상탐지 모델링
+# 4. 이상 탐지 모델링
+# 4-1. Model Selection
+# - 주요 변수의 개수가 많이 없음 > PCA + Mahalanobis Distance
+
+# [장점]
+# - 데이터 분포를 고려한 이상 탐지
+# - 비선형 관계의 데이터에 사용 가능
+# - 데이터 자체에 대한 가정이 필요없음
+
+# [단점]
+# - 변수간의 관계가 독립 = 유클리드 거리와 동일
+# - 변수간의 상관성이 명확하지 않은 경우 적용이 어려움 ("마할라노비스 거리 = 공분산을 고려한 알고리즘" 이기 때문)
+
+raw  = data_s.iloc[:, 0:1559]
+raw.head()
+
+X = raw.drop(["Class"], axis=1)
+y = raw["Class"]
+
+pca = PCA()
+pca.fit(X)
+reduced = pca.transform(X)
+
+features = range(pca.n_components_)
+df_features = pd.DataFrame(features, columns=["pc_feature"])
+
+df_variance = pd.DataFrame(data=pca.explained_variance_ratio_, columns=["variance"])
+
+df_pc_variance = pd.concat([df_features, df_variance], axis=1)
+df_pc_variance.head()  # PC0, PC1으로도 전체 분산의 3%(0.03xxx) 정도 밖에 표현하지 못함
+
+
+# feature 별 분산을 확인하기 위한 시각화
+fig, ax = plt.subplots(figsize=(10, 4))
+xi = np.arange(1, reduced.shape[1]+1, step=1)
+yi = np.cumsum(pca.explained_variance_ratio_) * 100
+
+plt.ylim(0.0, 101)
+plt.xlabel("Number of Principle Components")
+plt.ylabel("Explained Features (%)")
+sns.scatterplot(x=xi, y=yi)
+plt.show()
+
+# 차원 축소 데이터 셋 생성
+pca = PCA(n_components=400)
+pc = pca.fit_transform(X)
+
+df_pc = pd.DataFrame(data=pc).reset_index(drop=True)
+df_pc.head()
+
+# 마할라노비스 거리함수 모델 생성
+detector = EllipticEnvelope(contamination=.10)
+detector.fit(df_pc)
+
+pred = detector.predict(df_pc)
+pd.Series(pred).value_counts()  # -1 = Outlier
+
+# 평가를 위한 재 라벨링 수행
+y_pred = np.where(pred == -1, 1, 0) # 1 = Outlier / 0 = Normal
+
+# 성능평가
+print(classification_report(y, y_pred))
+#       precision    recall  f1-score   support
+# 0.0       0.93      0.91      0.92      1620
+# 1.0       0.22      0.27      0.24       143
+# accuracy                           0.86      1763
+# macro avg       0.58      0.59      0.58      1763
+# weighted avg       0.88      0.86      0.87      1763
+
+
+answer = pd.DataFrame({ "pred" : y_pred, "Class": y }, columns=["pred", "Class"])
+answer[answer["pred"]==1].head()
+
+
+# Scoring 기반 Threshold 조정
+detector.dist_
+
+fig, ax = plt.subplots(figsize=(25, 5))
+sns.displot(detector.dist_, label="distrubution")
+plt.legend()
+plt.show()
+
+0.1 * pow(10, 8)
+
+y_pred_re = np.where(detector.dist_ > 0.1 * pow(10, 8), 1, 0)
+print(classification_report(y, y_pred_re))
+#        precision    recall  f1-score   support
+# 0.0       0.92      0.99      0.95      1620
+# 1.0       0.31      0.06      0.09       143
+# accuracy                           0.91      1763
+# macro avg       0.61      0.52      0.52      1763
+# weighted avg       0.87      0.91      0.88      1763
