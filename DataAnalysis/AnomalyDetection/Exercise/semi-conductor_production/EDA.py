@@ -267,3 +267,7 @@ print(classification_report(y, y_pred_re))
 # accuracy                           0.91      1763
 # macro avg       0.61      0.52      0.52      1763
 # weighted avg       0.87      0.91      0.88      1763
+
+pd.Series(y_pred_re).value_counts()
+# 0    1737
+# 1      26
